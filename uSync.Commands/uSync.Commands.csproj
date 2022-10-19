@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.Commands.Core\uSync.Commands.Core.csproj" />
+		<ProjectReference Include="..\uSync.Commands.Server\uSync.Commands.Server.csproj" />
 		<PackageReference Include="uSync" Version="10.1" />
 	</ItemGroup>
 	<PropertyGroup>
