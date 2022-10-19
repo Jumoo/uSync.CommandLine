@@ -1,0 +1,21 @@
+<Project>
+	<PropertyGroup>
+		<Authors>Kevin Jump</Authors>
+		<Company>Jumoo</Company>
+
+		<PackageTags>umbraco usync</PackageTags>
+
+		<Copyright>Jumoo @ 2022</Copyright>
+
+		<PackageReleaseNotes><![CDATA[10.0 Initial release]]></PackageReleaseNotes>
+	
+		<IncludeSymbols>false</IncludeSymbols>
+		<IncludeSymbols>false</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+		<IncludeBuildOutput>true</IncludeBuildOutput>
+
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+	</PropertyGroup>
+</Project>
