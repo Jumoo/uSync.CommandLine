@@ -9,7 +9,7 @@ using uSync.Handlers;
 var loggerFactory = LoggerFactory.Create(b =>
 {
     b.AddConsole();
-    // b.SetMinimumLevel(LogLevel.Debug);
+    b.SetMinimumLevel(LogLevel.Debug);
 });
 
 var logger = loggerFactory.CreateLogger("uSyncCommand");

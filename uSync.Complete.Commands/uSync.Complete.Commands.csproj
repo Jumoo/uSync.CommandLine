@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="uSync.Publisher" Version="10.3.0-rc001.20221018.12" />
+		<PackageReference Include="uSync.Publisher" Version="10.3.0" />
 	</ItemGroup>
 
 	<ItemGroup>

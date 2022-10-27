@@ -32,7 +32,7 @@ public abstract class uSyncCompleteCommandBase : SyncCommandBase
         {
             publisherStateService.Intiailize(request.Id, remoteServer, mode, items);
         }
-
+        
         var result = await publisherStateService.Process(request.Id);
 
         return new SyncCommandResponse
@@ -40,7 +40,9 @@ public abstract class uSyncCompleteCommandBase : SyncCommandBase
             Complete = result.IsComplete,
             Success = result.Sucess,
             TotalPages = 1000,
-            Message = result.Message
+            Message = $"{result.Sucess} {result.Message}",
+            Result = $"## {result.Sucess} {result.Message} ##",
+            ResultType = SyncCommandObjectType.String
         };
 
     }
