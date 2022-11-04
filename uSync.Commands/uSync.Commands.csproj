@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<Description>uSync Command line - server Commands for uSync </Description>
@@ -12,7 +12,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.Commands.Core\uSync.Commands.Core.csproj" />
 		<ProjectReference Include="..\uSync.Commands.Server\uSync.Commands.Server.csproj" />
-		<PackageReference Include="uSync" Version="10.1" />
+		<PackageReference Include="uSync" Version="11.0.0-rc3" />
 	</ItemGroup>
 	<PropertyGroup>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>

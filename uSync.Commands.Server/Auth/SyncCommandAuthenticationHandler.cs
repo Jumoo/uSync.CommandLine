@@ -102,7 +102,7 @@ internal class SyncCommandAuthenticationHandler
         if (string.IsNullOrWhiteSpace(hmackey)) return null;
 
         var parameters = GetHmacAuthHeader(authHeaderValue);
-        if (parameters == null) return null;
+        if (parameters?.Nonce == null) return null;
 
         // stop multiple requests with same nonce value
         if (MemoryCache.Default.Contains(parameters.Nonce)) return null;
@@ -132,6 +132,8 @@ internal class SyncCommandAuthenticationHandler
 
     private bool CheckSigniture(string key, HmacParameters parameters, HttpRequest request)
     {
+        if (parameters?.Nonce== null) return false;
+
         var token = $"{request.Method}" +
             $"{parameters.Timestamp}" +
             $"{parameters.Nonce}" +

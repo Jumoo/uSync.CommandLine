@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Commands.Server", "uS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync", "uSync\uSync.csproj", "{093DC9BE-A674-45E9-ABD8-067C0CFAEFC7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{1C851BC7-2DEA-446E-A569-09ADD0136F31}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Commands", "uSync.Commands\uSync.Commands.csproj", "{1C9D8FEC-7D5A-4024-A6F4-DF7ACC96CBDF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "uSync.Complete.Commands", "uSync.Complete.Commands\uSync.Complete.Commands.csproj", "{1AB17FD0-8604-4188-8A2A-03726D85905C}"
@@ -19,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		directory.build.props = directory.build.props
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Site", "uSync.Site\uSync.Site.csproj", "{FC75BADC-3007-4CCF-BE9A-79A857DEF584}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,10 +38,6 @@ Global
 		{093DC9BE-A674-45E9-ABD8-067C0CFAEFC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{093DC9BE-A674-45E9-ABD8-067C0CFAEFC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{093DC9BE-A674-45E9-ABD8-067C0CFAEFC7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1C851BC7-2DEA-446E-A569-09ADD0136F31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C851BC7-2DEA-446E-A569-09ADD0136F31}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C851BC7-2DEA-446E-A569-09ADD0136F31}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C851BC7-2DEA-446E-A569-09ADD0136F31}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1C9D8FEC-7D5A-4024-A6F4-DF7ACC96CBDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1C9D8FEC-7D5A-4024-A6F4-DF7ACC96CBDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C9D8FEC-7D5A-4024-A6F4-DF7ACC96CBDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -50,6 +46,10 @@ Global
 		{1AB17FD0-8604-4188-8A2A-03726D85905C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AB17FD0-8604-4188-8A2A-03726D85905C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AB17FD0-8604-4188-8A2A-03726D85905C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC75BADC-3007-4CCF-BE9A-79A857DEF584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC75BADC-3007-4CCF-BE9A-79A857DEF584}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC75BADC-3007-4CCF-BE9A-79A857DEF584}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC75BADC-3007-4CCF-BE9A-79A857DEF584}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
