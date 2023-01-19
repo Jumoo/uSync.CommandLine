@@ -12,7 +12,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.Commands.Core\uSync.Commands.Core.csproj" />
 		<ProjectReference Include="..\uSync.Commands.Server\uSync.Commands.Server.csproj" />
-		<PackageReference Include="uSync" Version="11.0.0-rc3" />
+		<PackageReference Include="uSync" Version="11.0.0" />
 	</ItemGroup>
 	<PropertyGroup>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
