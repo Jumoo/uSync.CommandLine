@@ -112,7 +112,7 @@ internal class SyncCommandAuthenticationHandler
             return null;
 
         // if the signature is OK, 
-        if (CheckSigniture(hmackey, parameters, Request)) return null;
+        if (!CheckSigniture(hmackey, parameters, Request)) return null;
 
         return await _backOfficeUserManager.FindByIdAsync(Constants.Security.SuperUserIdAsString);
     }
