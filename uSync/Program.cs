@@ -36,4 +36,4 @@ var result = await rootCommand.InvokeAsync(args);
 // if there is an error we sleep for 1/2 a second, just lets logging catch up
 if (result != 0) Thread.Sleep(500);
 
-
+return result;
