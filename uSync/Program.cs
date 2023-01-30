@@ -25,9 +25,6 @@ var commands = new List<ISyncCommandHandler>
 
 var rootCommand = new RootCommand("uSync command line");
 
-Console.Out.WriteLine("  *** uSync Command Line ***");
-Console.Out.WriteLine("");
-
 foreach (var command in commands)
 {
     if (command.Command is null) continue;
