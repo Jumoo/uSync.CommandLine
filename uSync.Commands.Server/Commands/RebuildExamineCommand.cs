@@ -46,6 +46,7 @@ internal class RebuildExamineCommand : SyncCommandBase
             if (_rebuilder.CanRebuild(index))
             {
                 _rebuilder.RebuildIndex(index);
+                response.Success = true;
                 response.Result = $"Index build started for [{index}]";
             }
             else
