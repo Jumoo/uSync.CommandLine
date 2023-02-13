@@ -32,6 +32,10 @@ Will return information about your site
 
 ## uSync Command Library (for Umbraco)
 
+
+## !! Checkout the WIKI for more complete examples
+https://github.com/Jumoo/uSync.CommandLine/wiki
+
 In-order for the uSync command line to successfully connect with a site - that site needs to have the uSync command library installed **and configured**
 
 ```
