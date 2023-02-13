@@ -73,13 +73,15 @@ dotnet restore ..
 # rm ..\build-files\App_Plugins\ -Recurse
 # &gulp minify --release $versionString
 
+$buildParams = "ContinuousIntegrationBuild=true,version=$versionString"
+
 ""; "##### Packaging"; "----------------------------------" ; ""
 
-dotnet pack ..\uSync\uSync.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$versionString --no-restore # --no-build
-dotnet pack ..\uSync.Commands\uSync.Commands.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$versionString --no-restore # --no-build
-dotnet pack ..\uSync.Commands.Core\uSync.Commands.Core.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$versionString --no-restore # --no-build
-dotnet pack ..\uSync.Commands.Server\uSync.Commands.Server.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$versionString --no-restore # --no-build
-# dotnet pack ..\uSync.Complete.Commands\uSync.Complete.Commands.csproj -c $env -o $outFolder /p:ContinuousIntegrationBuild=true,version=$versionString --no-restore # --no-build
+dotnet pack ..\uSync\uSync.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
+dotnet pack ..\uSync.Commands\uSync.Commands.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
+dotnet pack ..\uSync.Commands.Core\uSync.Commands.Core.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
+dotnet pack ..\uSync.Commands.Server\uSync.Commands.Server.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
+# dotnet pack ..\uSync.Complete.Commands\uSync.Complete.Commands.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
 
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""
