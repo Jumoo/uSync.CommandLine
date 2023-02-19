@@ -56,7 +56,7 @@ return information about an umbraco installation
 Ping a server until it is up (at least until Umbraco controllers respond).
 
 ## Rebuild-DBCache
-Rebuiold the database cache 
+Rebuild the database cache 
 
 ## Rebuild-Index
 Rebuild an examine index on the server
