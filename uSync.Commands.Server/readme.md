@@ -5,7 +5,7 @@ uSycnc commands library for Umbraco.
 This is the package to install on the Umbraco site to Enable the uSync command line to run against your site. 
 
 ```
-dotnet install package uSync.Commands.server
+dotnet add package uSync.Commands.server
 ```
 
 > Note: this is the root command it doesn't include the uSync specific commands use uSync.Commands to also get them.
