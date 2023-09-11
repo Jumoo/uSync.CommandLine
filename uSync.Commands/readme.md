@@ -5,7 +5,7 @@ The uSync specific command library for the uSync command line.
 This package includes the core uSync command line libraries and specific ones for uSync (e.g uSync-Import). 
 
 ```
-dotnet install package uSync.Commands
+dotnet add package uSync.Commands
 ```
 
 ## Commands 

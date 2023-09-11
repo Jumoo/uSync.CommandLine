@@ -5,7 +5,7 @@ uSycnc commands library for Umbraco.
 This is the package to install on the Umbraco site to Enable the uSync command line to run against your site. 
 
 ```
-dotnet install package uSync.Commands.server
+dotnet add package uSync.Commands.server
 ```
 
 > Note: this is the root command it doesn't include the uSync specific commands use uSync.Commands to also get them.
@@ -56,7 +56,7 @@ return information about an umbraco installation
 Ping a server until it is up (at least until Umbraco controllers respond).
 
 ## Rebuild-DBCache
-Rebuiold the database cache 
+Rebuild the database cache 
 
 ## Rebuild-Index
 Rebuild an examine index on the server
