@@ -3,11 +3,10 @@
 using uSync.Commands.Core;
 using uSync.Commands.Core.Extensions;
 using uSync.Expansions.Core;
-using uSync.Expansions.Core.Restore;
 using uSync.Expansions.Core.Restore.Services;
 using uSync.Expansions.Core.Services;
 
-namespace uSync.Complete.Commands;
+namespace uSync.Complete.Commands.Restore;
 internal class uSyncCreateRestorePointCommand : SyncCommandBase
 {
     private readonly ISyncRestorePointService _syncRestorePointService;
@@ -53,7 +52,7 @@ internal class uSyncCreateRestorePointCommand : SyncCommandBase
         };
 
         return command;
-        
+
     }
 
     public override async Task<SyncCommandResponse> Execute(SyncCommandRequest request)
@@ -91,7 +90,7 @@ internal class uSyncCreateRestorePointCommand : SyncCommandBase
             return new SyncCommandResponse(id, attempt.Success)
             {
                 Complete = attempt.AllPagesProcessed,
-                AdditionalData = attempt.AdditionalData               
+                AdditionalData = attempt.AdditionalData
             };
 
 

@@ -1,22 +1,30 @@
-﻿using uSync.BackOffice.SyncHandlers;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using uSync.BackOffice.SyncHandlers;
 using uSync.Commands.Core;
 using uSync.Commands.Core.Extensions;
 using uSync.Core.Dependency;
 using uSync.Publisher.Client;
 using uSync.Publisher.Models;
 
-namespace uSync.Complete.Commands;
-internal class uSyncPushCommand : uSyncCompleteCommandBase
+namespace uSync.Complete.Commands.Publisher;
+internal class uSyncPullCommand : uSyncCompleteCommandBase
 {
-    public uSyncPushCommand(
+    public uSyncPullCommand(
         SyncHandlerFactory syncHandlerFactory,
-        IPublisherStateService publisherStateService) 
+        IPublisherStateService publisherStateService)
         : base(syncHandlerFactory, publisherStateService)
     { }
 
-    public override string Id => "uSync-Push";
-    public override string Name => "uSync Push";
-    public override string Description => "Push updates via uSync.Publisher";
+    public override string Id => "uSync-Pull";
+
+    public override string Name => "uSync Pull";
+
+    public override string Description => "Pull updates via uSync.Publisher";
 
     public override SyncCommandInfo GetCommand()
     {
@@ -27,7 +35,7 @@ internal class uSyncPushCommand : uSyncCompleteCommandBase
             new SyncCommandParameterInfo
             {
                  Id = "server",
-                 Description = "Server to push to",
+                 Description = "Server to pull from",
                  ParameterType = SyncCommandObjectType.String
             },
             new SyncCommandParameterInfo
@@ -41,7 +49,6 @@ internal class uSyncPushCommand : uSyncCompleteCommandBase
         return command;
 
     }
-
     public override async Task<SyncCommandResponse> Execute(SyncCommandRequest request)
     {
         var group = request.GetParameterValue("group", "settings");
@@ -54,8 +61,8 @@ internal class uSyncPushCommand : uSyncCompleteCommandBase
     {
         return group switch
         {
-            "content" => PublishMode.Push,
-            _ => PublishMode.SettingsPush,
+            "content" => PublishMode.Pull,
+            _ => PublishMode.SettingsPull,
         };
     }
 }

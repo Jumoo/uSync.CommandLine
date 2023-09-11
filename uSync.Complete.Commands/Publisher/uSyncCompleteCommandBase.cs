@@ -9,7 +9,7 @@ using uSync.Publisher;
 using uSync.Publisher.Client;
 using uSync.Publisher.Models;
 
-namespace uSync.Complete.Commands;
+namespace uSync.Complete.Commands.Publisher;
 public abstract class uSyncCompleteCommandBase : SyncCommandBase
 {
     protected readonly SyncHandlerFactory syncHandlerFactory;
@@ -32,7 +32,7 @@ public abstract class uSyncCompleteCommandBase : SyncCommandBase
         {
             publisherStateService.Intiailize(request.Id, remoteServer, mode, items);
         }
-        
+
         var result = await publisherStateService.Process(request.Id);
 
         return new SyncCommandResponse
@@ -42,7 +42,7 @@ public abstract class uSyncCompleteCommandBase : SyncCommandBase
             TotalPages = 1000,
             Message = $"{result.Sucess} {result.Message}",
             Result = $"## {result.Sucess} {result.Message} ##",
-            ResultType = SyncCommandObjectType.String
+            ResultType = SyncCommandObjectType.String,
         };
 
     }
