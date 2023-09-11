@@ -38,7 +38,8 @@ internal class InfoCommand : SyncCommandBase
                 Servers = string.Join(" ", _serverRegistrationService.GetActiveServers()?.Select(x => x.ServerAddress) ?? Enumerable.Empty<string>()),
                 Environment = _hostEnvironment.EnvironmentName,
                 ApplicatioName = _hostEnvironment.ApplicationName,
-                ContentRootPath = _hostEnvironment.ContentRootPath
+                ContentRootPath = _hostEnvironment.ContentRootPath,
+                Parameters = string.Join(",", request.Parameters.Select(x => x.Id))
             }
-        });
+        }); 
 }

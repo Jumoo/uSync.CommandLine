@@ -67,7 +67,8 @@ internal class RemoteRuntimeService : IRemoteRuntimeService
     }
 
     public async Task<SyncCommandResponse?> ExecuteCommandAsync(string? command,
-        IEnumerable<string>? parameters)
+        IEnumerable<string>? parameters,
+        TextWriter writer)
     {
         var page = 0;
         var stepIndex = 0;
@@ -81,7 +82,7 @@ internal class RemoteRuntimeService : IRemoteRuntimeService
             StepIndex = stepIndex,
             ActionId = actionAlias,
             Parameters = GetParameters(parameters),
-            PageSize = 15
+            PageSize = 15,
         };
 
         bool isComplete = false;
@@ -92,7 +93,7 @@ internal class RemoteRuntimeService : IRemoteRuntimeService
         {
             request.Page = page;
 
-            _logger.LogDebug($"{page,3} > ");
+            await writer.WriteAsync($"{request.CommandId, -10} : {page,3} > ");
 
             response = await InvokeRemoteCommandAsync(request);
 
@@ -110,7 +111,13 @@ internal class RemoteRuntimeService : IRemoteRuntimeService
 
             if (!hasError)
             {
-                _logger.LogDebug($"Result: [Page:{page,3}] [s:{response.Success,-5}] [c:{response.Complete}] {response.Message}");
+                await writer.WriteLineAsync($"{response.Success,-6} {response.Message}");
+
+                if (response.AdditionalData.Count > 0)
+                {
+                    _logger.LogDebug(">>> Data: {data}", string.Join(",", response.AdditionalData
+                        .Select(x => $"[{x.Key}={x.Value}]")));
+                }
             }
 
             page++;
@@ -125,10 +132,14 @@ internal class RemoteRuntimeService : IRemoteRuntimeService
                     page = 0;
                 }
 
-
+                request.AdditionalData = response.AdditionalData;
 
                 request.StepIndex = response.StepIndex;
                 request.ActionId = response.NextAction;
+            }
+            else
+            {
+                await writer.WriteLineAsync("## Completed ##");
             }
         }
 
@@ -141,6 +152,15 @@ internal class RemoteRuntimeService : IRemoteRuntimeService
         using (var client = GetHttpClient())
         {
             var url = GetActionUrl("Execute");
+
+            _logger.LogDebug("Invoke: {url} {requestId} {action}-{step}-{page}",
+                url, request.Id, request.ActionId, request.StepIndex, request.Page);
+
+            if (request.AdditionalData.Count > 0)
+            {
+                _logger.LogDebug("Invoke: Additional {data}", string.Join(",", request.AdditionalData
+                        .Select(x => $"[{x.Key}={x.Value}]")));
+            }
 
             var response = await client.PostAsJsonAsync(url, request);
             var content = await response.Content.ReadAsStringAsync();
@@ -179,6 +199,10 @@ internal class RemoteRuntimeService : IRemoteRuntimeService
                     Id = arguments[0],
                     Value = arguments[1]
                 });
+            }
+            else if (arguments.Length == 1)
+            {
+                parameterList.Add(new SyncCommandParameter { Id = arguments[0] });
             }
         }
 

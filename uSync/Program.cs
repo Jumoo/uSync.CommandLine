@@ -12,7 +12,7 @@ var loggerFactory = LoggerFactory.Create(b =>
     // b.SetMinimumLevel(LogLevel.Debug);
 });
 
-var logger = loggerFactory.CreateLogger("uSyncCommand");
+var logger = loggerFactory.CreateLogger("uSync");
 
 var commands = new List<ISyncCommandHandler>
 {
