@@ -72,10 +72,9 @@ internal class RunCommandHandler : RemoteCommandHandlerBase
         if (string.IsNullOrEmpty(parameters.Command))
             throw new uSyncCommandException(14, "Missing command name argument");
 
-        _logger.LogDebug($"Contacting {runtimeService.Uri}....");
-        _logger.LogDebug($"Running command [{parameters.Command}]");
+        await _writer.WriteLineAsync($"Running {runtimeService.Uri} [{parameters.Command}]");
 
-        var result = await runtimeService.ExecuteCommandAsync(parameters?.Command, parameters?.Parameters);
+        var result = await runtimeService.ExecuteCommandAsync(parameters?.Command, parameters?.Parameters, _writer);
         if (result == null)
         {
             _logger.LogWarning("No result received");
@@ -101,10 +100,10 @@ internal class RunCommandHandler : RemoteCommandHandlerBase
         {
             case SyncCommandObjectType.Json:
                 var result = JsonConvert.SerializeObject(response.Result, Formatting.Indented);
-                await _writer.WriteLineAsync(result);
+                await _writer.WriteLineAsync($"Result: {result}");
                 break;
             default:
-                await _writer.WriteLineAsync($"{response.Result}");
+                await _writer.WriteLineAsync($"Result: {response.Result}");
                 break;
         }
     }

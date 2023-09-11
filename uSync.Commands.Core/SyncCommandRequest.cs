@@ -40,6 +40,11 @@ public class SyncCommandRequest
     ///  the total amount of items per page 
     /// </summary>
     public int PageSize { get; set; }
+
+    /// <summary>
+    ///  additional data that is passed around between requests
+    /// </summary>
+    public Dictionary<string, object> AdditionalData { get; set; } = new();
 }
 
 /// <summary>

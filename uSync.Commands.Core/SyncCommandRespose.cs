@@ -81,4 +81,9 @@ public class SyncCommandResponse
     public SyncCommandObjectType ResultType { get; set; }
 
     public bool ResetPaging { get; set; }
+
+    /// <summary>
+    ///  any additional data that might get passed around while chaining request. 
+    /// </summary>
+    public Dictionary<string, object> AdditionalData { get; set; } = new();
 }

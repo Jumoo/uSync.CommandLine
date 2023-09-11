@@ -10,6 +10,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="uSync.Publisher" Version="11.0.0" />
+		<PackageReference Include="uSync.Publisher" Version="12.2.0-build.20230911.14" />
 	</ItemGroup>
 
 	<ItemGroup>

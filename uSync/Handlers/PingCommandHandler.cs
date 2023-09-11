@@ -62,7 +62,7 @@ internal class PingCommandHandler : RemoteCommandHandlerBase
             try
             {
                 await _writer.WriteAsync($"{n + 1}...");
-                var result = await runtimeService.ExecuteCommandAsync("Ping", Enumerable.Empty<string>());
+                var result = await runtimeService.ExecuteCommandAsync("Ping", Enumerable.Empty<string>(), _writer);
 
                 if (result == null || !result.Success)
                     throw new Exception($"Failed {result?.Message ?? "NULL"}");
