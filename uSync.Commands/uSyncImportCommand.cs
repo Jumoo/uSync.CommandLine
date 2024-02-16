@@ -2,7 +2,7 @@
 
 using uSync.BackOffice;
 using uSync.BackOffice.Configuration;
-using uSync.BackOffice.Controllers;
+using uSync.BackOffice.Models;
 using uSync.BackOffice.SyncHandlers;
 using uSync.Commands.Core;
 using uSync.Core.Serialization;
