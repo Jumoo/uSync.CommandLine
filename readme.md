@@ -13,7 +13,7 @@ when the tool is installed (and the Umbraco site is configured) you can run remo
 
 for example
 ```
-uSync run info -s http://localhost:44382 -user <username> -pass <password>
+uSync run info -s http://localhost:44382/umbraco -user <username> -pass <password>
 ```
 
 Will return information about your site
