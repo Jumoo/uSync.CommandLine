@@ -46,7 +46,7 @@ public class uSyncImportCommand : uSyncCommandBase
         var actions = await Task.FromResult(uSyncService.ImportHandler(handler, new BackOffice.uSyncImportOptions
         {
             HandlerSet = set,
-            RootFolder = folder,
+            Folders = [folder],
             Flags = force ? SerializerFlags.Force : SerializerFlags.None
         }));
 

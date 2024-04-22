@@ -28,7 +28,7 @@ public class uSyncExportCommand : uSyncCommandBase
         var actions = await Task.FromResult(uSyncService.ExportHandler(handler, new uSyncImportOptions
         {
             HandlerSet = set,
-            RootFolder = folder
+            Folders = [folder]
         }));
 
         return new SyncActionResult(actions);

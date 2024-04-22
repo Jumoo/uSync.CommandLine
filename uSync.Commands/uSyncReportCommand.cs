@@ -28,7 +28,7 @@ public class uSyncReportCommand : uSyncCommandBase
         var actions = await Task.FromResult(uSyncService.ReportHandler(handler, new uSyncImportOptions
         {
             HandlerSet = set,
-            RootFolder = folder
+            Folders = [folder],
         }));
 
         return new SyncActionResult(actions);
