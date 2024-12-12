@@ -5,6 +5,10 @@
 This is the v15 version of the uSync command line util, it uses the ManagementAPI (and the uSync Maanagement API) to do the funky stuff without
 you having to install anything on the server.
 
+```
+dotnet tool install uSync.Cli --version 15.0.0-beta1
+```
+
 ## Create an API user
 
 In the users section of Umbraco
