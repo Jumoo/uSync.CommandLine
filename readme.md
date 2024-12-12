@@ -1,54 +1,46 @@
 # uSync Command Line library
 
-The uSync command line library has two parts 
+### uSync command line for Umbraco v15+
 
-## uSync command line
-the uSync command line is a dotnet tool that you install locally (or in your CI/CD pipeline!). to run commands remotely against an umbraco site. 
+This is the v15 version of the uSync command line util, it uses the ManagementAPI (and the uSync Maanagement API) to do the funky stuff without
+you having to install anything on the server.
 
-```
-dotnet tool install uSync.Cli -g
-```
+## Create an API user
 
-when the tool is installed (and the Umbraco site is configured) you can run remote commands against the Umbrac site. 
+In the users section of Umbraco
 
-for example
-```
-uSync run info -s http://localhost:44382/umbraco -user <username> -pass <password>
-```
+![Add Api User](./img/add-api-user.png)
 
-Will return information about your site
+create the api user and add them to the relevant group
 
-```
-{
-  "version": "10.2.0",
-  "level": "Run",
-  "role": 1,
-  "servers": "https://localhost:44382/",
-  "environment": "Development",
-  "applicatioName": "uSync.Site",
-  "contentRootPath": "C:\\Source\\Testings\\uSync.CommandLine\\uSync.Site"
-}
-```
+![Create API user](./img/create-api-user.png)
 
-## uSync Command Library (for Umbraco)
+## Add a Client Secret and Key
 
-In-order for the uSync command line to successfully connect with a site - that site needs to have the uSync command library installed **and configured**
+Once you have created an API user , you will need to give them a client id and secret,
 
-```
-dotnet install package uSync.Commands
-```
+![client secret](./img/client-secret.png)
 
-by default the command line is disabeld you need to turn it on for the authentication methods you wish to use. 
+you will need both the client id and secret to connect via the command line.
+
+## either add an appsetting.json or use the `-k` `-i` settings
+
+you can add an appsettings.json to the root of the folder where
+you are running the uSync command line:
 
 ```json
-"uSync": {
-  "Commands": {
-    "Enabled": "hmac,basic",
-    "key": "HMAC-KEY-VALUE",
-    "UserId" : -1
+{
+  "uSync": {
+    "Command": {
+      "Secret": "[CLIENT_SECRET]",
+      "ClientId": "[CLIENT_ID]"
+    }
   }
 }
 ```
 
-*.. see [uSync.Commands.Server](./uSync.Commands.Server/readme.md) readme for details.*
+or you can pass these on the command line. eg.
 
+```
+usync-ping -s https://localhost:44359 -s [client_secret] -k [client_id]
+```

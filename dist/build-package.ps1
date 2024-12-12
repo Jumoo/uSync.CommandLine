@@ -51,20 +51,11 @@ if (![string]::IsNullOrWhiteSpace($suffix) -and $suffix.indexOf('.') -ne -1)
 	$outFolder = ".\$major\$version\$version-$suffixFolder\$versionString"
 }
 
-# workout uSync version from packages.xml ?
-$packages = "..\uSync.Commands\uSync.Commands.csproj"
-[xml]$packagefile = Get-Content $packages
-$uSyncXml = $packagefile.Project.ItemGroup.PackageReference | Where-Object { $_.Include -eq "uSync" }  
-$uSyncVersion = $uSyncXml.version
 
 "----------------------------------"
 Write-Host "Version    :" $versionString
-Write-Host "uSync      :" $uSyncVersion
 Write-Host "Config     :" $env
 "----------------------------------" ; ""
-if ([string]::IsNullOrWhiteSpace($uSyncVersion)) {
-	Break
-}
 
 # dotnet build .. -c $env /p:ContinuousIntegrationBuild=true,version=$versionString
 dotnet restore .. 
@@ -78,10 +69,6 @@ $buildParams = "ContinuousIntegrationBuild=true,version=$versionString"
 ""; "##### Packaging"; "----------------------------------" ; ""
 
 dotnet pack ..\uSync\uSync.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
-dotnet pack ..\uSync.Commands\uSync.Commands.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
-dotnet pack ..\uSync.Commands.Core\uSync.Commands.Core.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
-dotnet pack ..\uSync.Commands.Server\uSync.Commands.Server.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
-# dotnet pack ..\uSync.Complete.Commands\uSync.Complete.Commands.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
 
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""

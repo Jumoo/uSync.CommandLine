@@ -5,9 +5,9 @@
 
 		<PackageTags>umbraco usync</PackageTags>
 
-		<Copyright>Jumoo @ 2022</Copyright>
+		<Copyright>Jumoo @ 2024</Copyright>
 
-		<PackageReleaseNotes><![CDATA[10.0 Initial release]]></PackageReleaseNotes>
+		<PackageReleaseNotes><![CDATA[15. Management API Release]]></PackageReleaseNotes>
 	
 		<IncludeSymbols>false</IncludeSymbols>
 		<IncludeSymbols>false</IncludeSymbols>

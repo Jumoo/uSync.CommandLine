@@ -1,39 +1,46 @@
-﻿//
-// the uSync command line.
-//
+﻿using System.CommandLine.Parsing;
+using System.Diagnostics;
 
-using System.CommandLine;
-using Microsoft.Extensions.Logging;
-using uSync.Handlers;
+using uSync;
+using uSync.Commands.Cache;
+using uSync.Commands.Core.Commands;
+using uSync.Commands.HealthChecks;
+using uSync.Commands.Index;
+using uSync.Commands.Models;
+using uSync.Commands.User;
+using uSync.Commands.uSync;
 
-var loggerFactory = LoggerFactory.Create(b =>
+var serviceProvider = BuildHelper.BuildServiceProvider(
+    [
+        typeof(TestCommand),
+        typeof(UserCurrentCommand),
+        typeof(UserListCommand),
+        typeof(CacheRebuildCommand),
+        typeof(CacheReloadCommand),
+        typeof(ModelsRebuildCommand),
+        typeof(ModelsStatusCommand),
+        typeof(IndexerRebuildCommand),
+        typeof(IndexerListCommand),
+        typeof(HealthCheckListCommand),
+        typeof(HealthCheckGroupListCommand),
+        typeof(HealthCheckGroupCheckCommand),
+        typeof(uSyncSettingsCommand),
+        typeof(uSyncImportCommand),
+        typeof(uSyncExportCommand),
+        typeof(uSyncPingCommand)
+    ]);
+
+var parser = BuildHelper.BuildParser(serviceProvider);
+
+var fileVersionInfo = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location);
+
+var version = fileVersionInfo.ProductVersion ?? "15.0.0";
+if (version.IndexOf('+') > 0)
 {
-    b.AddConsole();
-    // b.SetMinimumLevel(LogLevel.Debug);
-});
-
-var logger = loggerFactory.CreateLogger("uSyncCommand");
-
-var commands = new List<ISyncCommandHandler>
-{
-    new RunCommandHandler(logger, Console.Out),
-    new ListCommandHandler(logger, Console.Out),
-    new PingCommandHandler(logger, Console.Out),
-    new KeyGenCommandHandler(Console.Out),
-    new ServerCommandHandler()
-};
-
-var rootCommand = new RootCommand("uSync command line");
-
-foreach (var command in commands)
-{
-    if (command.Command is null) continue;
-    rootCommand.AddCommand(command.Command);
+     version = version.Substring(0, version.IndexOf('+'));
 }
 
-var result = await rootCommand.InvokeAsync(args);
+Console.WriteLine($"uSync CommandLine: {version ?? "15.0.0"}");
+Console.WriteLine("");
 
-// if there is an error we sleep for 1/2 a second, just lets logging catch up
-if (result != 0) Thread.Sleep(500);
-
-return result;
+return await parser.InvokeAsync(args);
