@@ -9,6 +9,51 @@ you having to install anything on the server.
 dotnet tool install uSync.Cli --version 15.0.0-beta1
 ```
 
+## Loads of useful commands for umbrco !
+
+In this beta, we have plugged in the 'useful' things you might need from the command line.
+
+rebuild indexes, models or caches, or run usync imports or exports.
+
+```
+uSync CommandLine: 15.0.0-beta1
+
+Description:
+
+Usage:
+  uSync [command] [options]
+
+Options:
+  --version       Show version information
+  -?, -h, --help  Show help and usage information
+
+Commands:
+  test                     Test command
+  user-current             Fetch the user executing the commands
+  user-list                List all users
+  cache-rebuild            Rebuild the cache on the server
+  cache-reload             Reload the cache on the server
+  models-rebuild           Rebuild the models on the server
+  models-status            Get the status of the models on the server
+  indexer-rebuild          Rebuild the index on the server
+  indexer-list             List the indexes on the server
+  healthcheck-list         List the health checks on the server
+  healthcheck-group-list   List the health check groups on the server
+  healthcheck-group-check  Run a health check on the server
+  usync-settings           List all settings
+  usync-import             Import all items
+  usync-export             Export all items
+  usync-ping               Ping the uSync server
+```
+
+e.g
+
+run an import
+
+```
+uSyncCli usync-import -s https://myserver.com/ --force
+```
+
 ## Create an API user
 
 In the users section of Umbraco
