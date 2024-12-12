@@ -43,7 +43,7 @@ Commands:
   usync-settings           List all settings
   usync-import             Import all items
   usync-export             Export all items
-  usync-ping               Ping the uSync server
+  usync-ping               Ping the Umbraco server until it responds
 ```
 
 e.g
