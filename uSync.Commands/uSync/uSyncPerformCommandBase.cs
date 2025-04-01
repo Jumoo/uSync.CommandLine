@@ -23,8 +23,15 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
 
     protected void Spinner(int count)
     {
-        Console.Write(Dots[count % Dots.Length]);
-        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+        try
+        {
+            Console.Write(Dots[count % Dots.Length]);
+            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+        }
+        catch (Exception)
+        {
+            // ignore
+        }
     }
 
     protected async Task<PerformActionResponse> Process(InvocationContext context, PerformActionRequest request)
