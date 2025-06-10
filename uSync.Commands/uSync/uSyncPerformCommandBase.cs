@@ -23,15 +23,8 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
 
     protected void Spinner(int count)
     {
-        try
-        {
-            Console.Write(Dots[count % Dots.Length]);
-            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-        }
-        catch (Exception)
-        {
-            // ignore
-        }
+        if (count % 10 == 0) 
+            Writer.Write(".");
     }
 
     protected async Task<PerformActionResponse> Process(InvocationContext context, PerformActionRequest request)
@@ -44,7 +37,6 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
 
         PerformActionResponse response;
         int count = 0;
-        Console.CursorVisible = false;
         do
         {
             count++;
@@ -56,8 +48,6 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
             request.StepNumber = count;
 
         } while (response.Complete is false && count < 100);
-
-        Console.CursorVisible = true;
 
         return response;
     }
