@@ -19,7 +19,8 @@ public class uSyncSettingsCommand : ConnectedCommandBase, ISyncCommand
         AddCoreOptions(Command);
         Command.SetHandler(async (context) =>
         {
-            var uSyncClient = await GetUSyncClient(context);
+            var token = await GetToken(context);
+            var uSyncClient = await GetUSyncClient(context, token);
             var settings = await uSyncClient.GetSettingsAsync();
 
             await wrtier.WriteAsync($"uSync Settings: {settings.Folders.Count} folders");

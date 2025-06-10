@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using IdentityModel.Client;
+
+using Microsoft.Extensions.Configuration;
 
 using System;
 using System.Collections.Generic;
@@ -33,12 +35,25 @@ public class ConnectedCommandBase : SyncCommandBase
         return new UmbracoClient(auth.Url.AbsoluteUri, Client);
     }
 
-    protected async Task<uSyncClient> GetUSyncClient(InvocationContext context)
+    protected Task<uSyncClient> GetUSyncClient(InvocationContext context, string? token)
+    {
+        var auth = GetConnectionPartameters(context);
+        if (token is not null)
+            Client.SetBearerToken(token);
+
+        return Task.FromResult(new uSyncClient(auth.Url.AbsoluteUri, Client));
+    }
+
+    protected async Task<string> GetToken(InvocationContext context)
     {
         var auth = GetConnectionPartameters(context);
         Client.BaseAddress = auth.Url;
-        await Client.AuthorizeUmbracoClient(auth);
-        return new uSyncClient(auth.Url.AbsoluteUri, Client);
+        var token = await Client.GetAccessToken(auth);
+        if (token is null)
+        {
+            throw new Exception("Failed to get access token.");
+        }
+        return token;
     }
 }
 

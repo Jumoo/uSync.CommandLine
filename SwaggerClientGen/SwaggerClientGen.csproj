@@ -8,7 +8,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NSwag.CodeGeneration.CSharp" Version="14.2.0" />
+		<PackageReference Include="NSwag.CodeGeneration.CSharp" Version="14.4.0" />
 	</ItemGroup>
 
 </Project>
