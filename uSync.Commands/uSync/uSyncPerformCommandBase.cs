@@ -29,11 +29,12 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
 
     protected async Task<PerformActionResponse> Process(InvocationContext context, PerformActionRequest request)
     {
-        var uSyncClient = await GetUSyncClient(context);
+        var token = await GetToken(context);
+        var uSyncClient = await GetUSyncClient(context, token);
 
         var auth = GetConnectionPartameters(context);
-        var connectionid = await CreateSignalRClient(auth.Url.ToString());
-        request.Options.ClientId = connectionid;
+        var connectionId = await CreateSignalRClient(auth.Url.ToString(), token);
+        request.Options.ClientId = connectionId;
 
         PerformActionResponse response;
         int count = 0;
@@ -52,11 +53,11 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
         return response;
     }
 
-    protected async Task DisplayResults(PerformActionResponse results)
+    protected async Task DisplayResults(string action, PerformActionResponse results)
     {
         // display some results. 
         var changes = results.Status.Sum(x => x.Changes);
-        await Writer.WriteLineAsync($"Imported : {changes} changes");
+        await Writer.WriteLineAsync($"{action} : {changes} changes");
 
         foreach (var item in results.Status)
         {
@@ -64,23 +65,33 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
         }
     }
 
-    protected async Task<string?> CreateSignalRClient(string host)
+    protected async Task<string?> CreateSignalRClient(string host,string? token)
     {
-        var url = new Uri($"{host}umbraco/SyncHub");
-        var connection = new HubConnectionBuilder()
-            .WithUrl(url)
-            .Build();
-
-        connection.On<string>("add", async (message) =>
+        try
         {
-            await Writer.WriteLineAsync($"Add: {message}");
-        });
+            var url = new Uri($"{host}umbraco/SyncHub");
+            var connection = new HubConnectionBuilder()
+                .WithUrl(url, options=>
+                {
+                    options.AccessTokenProvider = () => Task.FromResult(token);
+                })
+                .Build();
 
-        connection.On<string>("update", async (message) =>
+            connection.On<string>("add", async (message) =>
+            {
+                await Writer.WriteLineAsync($"Add: {message}");
+            });
+
+            connection.On<string>("update", async (message) =>
+            {
+                await Writer.WriteLineAsync($"Update: {message}");
+            });
+            await connection.StartAsync();
+            return connection.ConnectionId;
+        }
+        catch
         {
-            await Writer.WriteLineAsync($"Update: {message}");
-        });
-        await connection.StartAsync();
-        return connection.ConnectionId;
+            return "";
+        }
     }
 }

@@ -7,6 +7,14 @@ public static class HttpClientExtensions
 {
     public static async Task<HttpClient> AuthorizeUmbracoClient(this HttpClient client, SyncConnectionParameters auth)
     {
+        var token = await GetAccessToken(client, auth);
+        if (token is not null)
+            client.SetBearerToken(token);
+        return client;
+    }
+
+    public static async Task<string?> GetAccessToken(this HttpClient client, SyncConnectionParameters auth)
+    {
         client.BaseAddress = auth.Url;
         var address = $"{client.BaseAddress}umbraco/management/api/v1/security/back-office/token";
         var tokenResponse = await client.RequestClientCredentialsTokenAsync(
@@ -21,8 +29,7 @@ public static class HttpClientExtensions
         {
             throw new Exception("Error:" + tokenResponse.Error);
         }
-        client.SetBearerToken(tokenResponse.AccessToken);
-        return client;
+        return tokenResponse.AccessToken;
     }
 
 }
