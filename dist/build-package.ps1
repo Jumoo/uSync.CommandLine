@@ -67,7 +67,6 @@ dotnet restore ..
 $buildParams = "ContinuousIntegrationBuild=true,version=$versionString"
 
 ""; "##### Packaging"; "----------------------------------" ; ""
-
 dotnet pack ..\uSync\uSync.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
 
 
@@ -77,7 +76,7 @@ Copy-Item -Path $outFolder\*.nupkg -Destination C:\Source\localgit
 
 if ($push) {
     ""; "##### Pushing to our nighly package feed"; "----------------------------------" ; ""
-	.\nuget.exe push "$outFolder\*.nupkg" -ApiKey AzureDevOps -src https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
+	nuget push "$outFolder\*.nupkg" -ApiKey AzureDevOps -src https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
 	
 	Remove-Item ".\last-push-*" 
     Out-File -FilePath ".\last-push-$versionString.txt" -InputObject $versionString
