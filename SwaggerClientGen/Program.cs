@@ -8,7 +8,7 @@ using System.Xml.Linq;
 // the Umbraco host (change this to fit your custom setup)
 const string host = "https://localhost:44359";
 
-const string mangementSwagger = $"{host}/umbraco/swagger/management/swagger.json?urls.primaryName=Umbraco%20Management%20API";
+const string mangementSwagger = $"{host}/umbraco/swagger/management/swagger.json";
 const string uSyncSwagger = $"{host}/umbraco/swagger/uSync/swagger.json";
 
 await GenerateClient(mangementSwagger, "Umbraco.Management.Api", "UmbracoClient");
