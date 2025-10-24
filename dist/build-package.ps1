@@ -11,42 +11,41 @@
     interpret any characters as escape sequences.	
 #>
 param(
-	[Parameter(Mandatory, HelpMessage="Version string to build package")]
+	[Parameter(Mandatory, HelpMessage = "Version string to build package")]
 	[string]
 	[Alias("v")] $version, # version to use
 
-	[Parameter(HelpMessage="Optional suffix to put on package (e.g beta001)")]
+	[Parameter(HelpMessage = "Optional suffix to put on package (e.g beta001)")]
 	[string]
 	$suffix, 
 
-	[Parameter(HelpMessage="Version of uSync to use (default will be take from package.config")]
+	[Parameter(HelpMessage = "Version of uSync to use (default will be take from package.config")]
 	[string]
 	$uSync,
 
-	[Parameter(HelpMessage="Override the uSync.CommandLine dependency - when releasing out of band updated")]
+	[Parameter(HelpMessage = "Override the uSync.CommandLine dependency - when releasing out of band updated")]
 	[string]
 	$depends, 
 
-	[parameter(HelpMessage="Build configuration (default release)")]
+	[parameter(HelpMessage = "Build configuration (default release)")]
 	[string]
 	$env = 'release', 
 
-	[Parameter(HelpMessage="Push to azure devops package feed")]
+	[Parameter(HelpMessage = "Push to azure devops package feed")]
 	[switch] $push = $false)
 
 # get version
 $versionString = $version
 
 if (![string]::IsNullOrWhiteSpace($suffix)) {
-	$versionString = -join($version, '-', $suffix)
+	$versionString = -join ($version, '-', $suffix)
 }
 
 $major = $version.substring(0, $version.lastIndexOf('.'))
 
 $outfolder = ".\$major\$version\$versionString"
 
-if (![string]::IsNullOrWhiteSpace($suffix) -and $suffix.indexOf('.') -ne -1) 
-{
+if (![string]::IsNullOrWhiteSpace($suffix) -and $suffix.indexOf('.') -ne -1) {
 	$suffixFolder = $suffix.substring(0, $suffix.indexOf('.'));
 	$outFolder = ".\$major\$version\$version-$suffixFolder\$versionString"
 }
@@ -68,18 +67,18 @@ $buildParams = "ContinuousIntegrationBuild=true,version=$versionString"
 
 ""; "##### Packaging"; "----------------------------------" ; ""
 dotnet pack ..\uSync\uSync.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
-
+dotnet pack ..\uSync.Command.Setup\uSync.Command.Setup.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""
 Copy-Item -Path $outFolder\*.nupkg -Destination C:\Source\localgit
 
 
 if ($push) {
-    ""; "##### Pushing to our nighly package feed"; "----------------------------------" ; ""
+	""; "##### Pushing to our nighly package feed"; "----------------------------------" ; ""
 	nuget push "$outFolder\*.nupkg" -ApiKey AzureDevOps -src https://pkgs.dev.azure.com/jumoo/Public/_packaging/nightly/nuget/v3/index.json
 	
 	Remove-Item ".\last-push-*" 
-    Out-File -FilePath ".\last-push-$versionString.txt" -InputObject $versionString
+	Out-File -FilePath ".\last-push-$versionString.txt" -InputObject $versionString
 }
 
 Write-Host "Complete : $versionString"

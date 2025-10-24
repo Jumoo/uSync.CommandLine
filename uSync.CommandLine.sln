@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F16E768D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwaggerClientGen", "SwaggerClientGen\SwaggerClientGen.csproj", "{B3816797-4FF9-459F-A49C-766CBBE74CA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Command.Setup", "uSync.Command.Setup\uSync.Command.Setup.csproj", "{B7B69858-1562-4082-B425-C5506474ECBB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,11 +43,18 @@ Global
 		{B3816797-4FF9-459F-A49C-766CBBE74CA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3816797-4FF9-459F-A49C-766CBBE74CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3816797-4FF9-459F-A49C-766CBBE74CA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7B69858-1562-4082-B425-C5506474ECBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7B69858-1562-4082-B425-C5506474ECBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7B69858-1562-4082-B425-C5506474ECBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7B69858-1562-4082-B425-C5506474ECBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B3816797-4FF9-459F-A49C-766CBBE74CA3} = {F16E768D-036A-41BB-A9A4-08B83336138D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C05ABC84-5554-4E41-AEA4-39F500A427E9}
 	EndGlobalSection
 EndGlobal

@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Umbraco.Cms" Version="16.0.0" />
 	  <PackageReference Include="uSync" Version="16.0.0" />
+	  <ProjectReference Include="..\uSync.Command.Setup\uSync.Command.Setup.csproj" /> 
   </ItemGroup>
 
   <ItemGroup>
