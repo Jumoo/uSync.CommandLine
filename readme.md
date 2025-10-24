@@ -91,5 +91,34 @@ you are running the uSync command line:
 or you can pass these on the command line. eg.
 
 ```
-usync-ping -s https://localhost:44359 -s [client_secret] -k [client_id]
+uSyncCli usync-ping -s https://localhost:44359 -s [client_secret] -k [client_id]
 ```
+
+## Automagic Api User / ClientID & Secret Generation.
+
+if the settings are stored in the sites appsettings.json (or the enviroment or a key vault). then you can
+use the `uSync.Command.Setup` package to automatically setup the API user for you. 
+
+```json
+"uSync": {
+    "Command": {
+      "AddIfMissing": true,
+      "ClientId": "[CLIENT_ID],
+      "Secret": "[CLIENT_SECRET]"
+    }
+  }
+```
+
+on boot the `uSync.Command.Setup` package will check to see if the clientId has been setup on your site.
+if it hasn't it creates an API user with the clientId / secret. 
+
+you can also specify `Email`, `Username` and `Name` for the API account, but if you don't some will
+be generated for you. 
+
+> [!WARNING]
+> This isn't compuslary, and it does open you up to potential issues if someone gets access to your appsettings.json
+> (although you might already be in trouble if this happens). 
+> 
+
+
+
