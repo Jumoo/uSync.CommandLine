@@ -9,7 +9,7 @@ you having to install anything on the server.
 dotnet tool install uSync.Cli --version 15.0.0-beta1
 ```
 
-## Loads of useful commands for umbrco !
+## Loads of useful commands for Umbraco !
 
 In this beta, we have plugged in the 'useful' things you might need from the command line.
 
