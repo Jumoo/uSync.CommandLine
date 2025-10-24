@@ -2,7 +2,7 @@
 
 ### uSync command line for Umbraco v15+
 
-This is the v15 version of the uSync command line util, it uses the ManagementAPI (and the uSync Maanagement API) to do the funky stuff without
+This is the v15+ version of the uSync command line util, it uses the ManagementAPI (and the uSync Maanagement API) to do the funky stuff without
 you having to install anything on the server.
 
 ```
