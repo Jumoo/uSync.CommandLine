@@ -74,10 +74,14 @@ public abstract class SyncCommandBase
 
         var json = File.ReadAllText(fullPath);
         var doc = JsonDocument.Parse(json);
-        var urlString = doc.RootElement.GetProperty("profiles").GetProperty("Umbraco.Web.UI").GetProperty("applicationUrl").GetString();
-        if (urlString is not null) 
-            return new Uri(urlString.Split(';')[0]);
-        
+        if (doc.RootElement.TryGetProperty("profiles", out var profilesElement) &&
+            profilesElement.TryGetProperty("Umbraco.Web.UI", out var umbracoElement) &&
+            umbracoElement.TryGetProperty("applicationUrl", out var applicationUrlElement))
+        {
+            var urlString = applicationUrlElement.GetString();
+            if (urlString is not null)
+                return new Uri(urlString.Split(';')[0]);
+        }
         return null;
     }
 }
