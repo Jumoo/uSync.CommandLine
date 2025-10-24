@@ -1,6 +1,9 @@
 ﻿
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
+using System.Diagnostics.Metrics;
 
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Composing;
@@ -26,25 +29,33 @@ internal class CommandApplicationStartedHandler : INotificationAsyncHandler<Umbr
 {
     private readonly IConfiguration _configuration;
     private readonly IUserService _userService;
-    private readonly IBackOfficeApplicationManager _backOfficeApplicationManager;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<CommandApplicationStartedHandler> _logger;
+    private readonly IRuntimeState _runtimeState;
 
     public CommandApplicationStartedHandler(
         IConfiguration configuration,
         IUserService userService,
-        IBackOfficeApplicationManager backOfficeApplicationManager,
-        ILogger<CommandApplicationStartedHandler> logger)
+        ILogger<CommandApplicationStartedHandler> logger,
+        IRuntimeState runtimeState,
+        IServiceProvider serviceProvider)
     {
         _configuration = configuration;
         _userService = userService;
-        _backOfficeApplicationManager = backOfficeApplicationManager;
         _logger = logger;
+        _runtimeState = runtimeState;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task HandleAsync(UmbracoApplicationStartedNotification notification, CancellationToken cancellationToken)
     {
         try
         {
+            if (_runtimeState.Level != RuntimeLevel.Run)
+            {
+                _logger.LogInformation("uSync.Command.Setup skipping clientId/Secret user creation - runtime level is {level}", _runtimeState.Level);
+                return;
+            }
             if (notification.IsRestarting) return;
 
             await AddClientIdAndSecret();
@@ -56,9 +67,12 @@ internal class CommandApplicationStartedHandler : INotificationAsyncHandler<Umbr
     }
 
     private async Task AddClientIdAndSecret() 
-    { 
-        if (_configuration.GetValue("uSync:Command:AddIfMissing", false) is false) 
+    {
+        if (_configuration.GetValue("uSync:Command:AddIfMissing", false) is false)
+        {
+            _logger.LogInformation("uSync.Command.Setup is disabled, not adding clientId/Secret user");
             return; // we require the explicit setup value to be true, to do this (off by default)
+        }
 
         var clientId = _configuration.GetValue("uSync:Command:ClientId", string.Empty);
         if (string.IsNullOrWhiteSpace(clientId))
@@ -110,8 +124,18 @@ internal class CommandApplicationStartedHandler : INotificationAsyncHandler<Umbr
             return; // didn't work
         }
 
+
+        // we can't inject this, because it will cause a failure on a clean boot if we do,
+        // so when we are here, we know umbraco is installed, we can go fetch it. 
+        var backOfficeApplicationManager = _serviceProvider.GetService<IBackOfficeApplicationManager>();
+        if (backOfficeApplicationManager is null)
+        {
+            _logger.LogWarning("uSync.Command.Setup was unable to add the client secret to the user: no IBackOfficeApplicationManager");
+            return;
+        }
+
         // add the client secret
-        await _backOfficeApplicationManager.EnsureBackOfficeClientCredentialsApplicationAsync(clientId, clientSecret);
+        await backOfficeApplicationManager.EnsureBackOfficeClientCredentialsApplicationAsync(clientId, clientSecret);
         _logger.LogInformation("uSync.Command.Setup has created the clientId/Secret user for uSync.Commands");
 
         await _userService.EnableAsync(userKey.Value, new HashSet<Guid> { userKey.Value });
