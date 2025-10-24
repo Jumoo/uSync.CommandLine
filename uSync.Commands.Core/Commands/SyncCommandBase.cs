@@ -63,7 +63,11 @@ public abstract class SyncCommandBase
     private Uri? GetServerUriFromConfig(string configPath)
     {
         var urlString = Configuration[configPath];
-        if (urlString is not null) return new Uri(urlString);
+        if (string.IsNullOrWhiteSpace(urlString)) return null;
+
+        if (Uri.TryCreate(urlString, UriKind.Absolute, out var uri))
+            return uri;
+
         return null;
     }
 
@@ -79,9 +83,13 @@ public abstract class SyncCommandBase
             umbracoElement.TryGetProperty("applicationUrl", out var applicationUrlElement))
         {
             var urlString = applicationUrlElement.GetString();
-            if (urlString is not null)
-                return new Uri(urlString.Split(';')[0]);
+
+            if (string.IsNullOrWhiteSpace(urlString)) return null;
+
+            if (Uri.TryCreate(urlString.Split(';')[0], UriKind.Absolute, out var uri))
+                return uri;
         }
+
         return null;
     }
 }
