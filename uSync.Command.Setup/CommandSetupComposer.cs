@@ -64,7 +64,7 @@ internal class CommandApplicationStartedHandler : INotificationAsyncHandler<Umbr
         if (string.IsNullOrWhiteSpace(clientId))
         {
             _logger.LogWarning("uSync.Command.Setup is enabled, but the config contains no clientId");
-            return; // not client id in the config
+            return; // no client id in the config
         }
 
         var clientSecret = _configuration.GetValue("uSync:Command:Secret", string.Empty);
