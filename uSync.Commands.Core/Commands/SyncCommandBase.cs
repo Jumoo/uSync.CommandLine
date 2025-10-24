@@ -2,6 +2,7 @@
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Text.Json;
 
 namespace uSync.Commands.Core.Commands;
 
@@ -27,14 +28,69 @@ public abstract class SyncCommandBase
         command.AddOption(optionClientId);
     }
 
-    public SyncConnectionParameters GetConnectionPartameters(InvocationContext context) 
+    public SyncConnectionParameters GetConnectionPartameters(InvocationContext context)
     {
         return new SyncConnectionParameters
         {
-            Url = context.ParseResult?.GetValueForOption(optionServerUrl) ?? throw new Exception("No host"),
+            Url = GetServerUri(context) ?? throw new Exception("No host"),
             ClientSecret = context.ParseResult?.GetValueForOption(optionSecret) ?? Configuration["uSync:Command:Secret"] ?? throw new Exception("No Client Secret"),
             ClientId = context.ParseResult?.GetValueForOption(optionClientId) ?? Configuration["uSync:Command:ClientId"] ?? throw new Exception("No ClientId")
-        };    
+        };
+    }
+
+    private Uri? GetServerUri(InvocationContext context)
+    {
+        var uri = context.ParseResult?.GetValueForOption(optionServerUrl);
+        if (uri is not null) return uri;
+
+        uri = GetServerUriFromConfig("uSync:Command:ServerUrl");
+        if (uri is not null) return uri;
+
+        uri = GetServerUriFromConfig("Umbraco:CMS:WebRouting:UmbracoApplicationUrl");
+        if (uri is not null) return uri;
+
+        uri = GetServerUrlFromLaunchSettings("Properties/launchSettings.json");
+        if (uri is not null) return uri;
+
+#if DEBUG
+        uri = GetServerUrlFromLaunchSettings("../Umbraco.Site/Properties/launchSettings.json");
+        if (uri is not null) return uri;
+#endif
+
+        return null;
+    }
+
+    private Uri? GetServerUriFromConfig(string configPath)
+    {
+        var urlString = Configuration[configPath];
+        if (string.IsNullOrWhiteSpace(urlString)) return null;
+
+        if (Uri.TryCreate(urlString, UriKind.Absolute, out var uri))
+            return uri;
+
+        return null;
+    }
+
+    private Uri? GetServerUrlFromLaunchSettings(string filePath)
+    {
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+        if (!File.Exists(fullPath)) return null;
+
+        var json = File.ReadAllText(fullPath);
+        var doc = JsonDocument.Parse(json);
+        if (doc.RootElement.TryGetProperty("profiles", out var profilesElement) &&
+            profilesElement.TryGetProperty("Umbraco.Web.UI", out var umbracoElement) &&
+            umbracoElement.TryGetProperty("applicationUrl", out var applicationUrlElement))
+        {
+            var urlString = applicationUrlElement.GetString();
+
+            if (string.IsNullOrWhiteSpace(urlString)) return null;
+
+            if (Uri.TryCreate(urlString.Split(';')[0], UriKind.Absolute, out var uri))
+                return uri;
+        }
+
+        return null;
     }
 }
 
