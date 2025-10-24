@@ -94,6 +94,18 @@ or you can pass these on the command line. eg.
 uSyncCli usync-ping -s https://localhost:44359 -s [client_secret] -k [client_id]
 ```
 
+## Automagic Server discovery. 
+if you place the uSync:Command settings in the appsettings.json file of a site. then if you run the uSync command 
+from within the site directory it will attempt to workout the server Url, 
+
+if will check : 
+  1. the command line `-s` parameter
+  2. for a `uSync:Command:ServerUrl` value in appsettings
+  3. for the UmbracoApplicationUrl value `Umbraco:CMS:WebRouting:UmbracoApplicationUrl`
+  4. for the applicationUrl value in the `Properties\launchSettings.json` file.
+
+if it finds one, it will use it as the server address. 
+
 ## Automagic Api User / ClientID & Secret Generation.
 
 if the settings are stored in the sites appsettings.json (or the enviroment or a key vault). then you can
@@ -103,7 +115,7 @@ use the `uSync.Command.Setup` package to automatically setup the API user for yo
 "uSync": {
     "Command": {
       "AddIfMissing": true,
-      "ClientId": "[CLIENT_ID],
+      "ClientId": "[CLIENT_ID]",
       "Secret": "[CLIENT_SECRET]"
     }
   }
@@ -118,7 +130,6 @@ be generated for you.
 > [!WARNING]
 > This isn't compuslary, and it does open you up to potential issues if someone gets access to your appsettings.json
 > (although you might already be in trouble if this happens). 
-> 
 
 
 
