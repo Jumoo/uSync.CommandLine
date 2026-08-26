@@ -51,7 +51,7 @@ public class ConnectedCommandBase : SyncCommandBase
         var token = await Client.GetAccessToken(auth);
         if (token is null)
         {
-            throw new Exception("Failed to get access token.");
+            throw new System.Exception("Failed to get access token.");
         }
         return token;
     }

@@ -2,11 +2,11 @@
 
 ### uSync command line for Umbraco v15+
 
-This is the v15+ version of the uSync command line util, it uses the ManagementAPI (and the uSync Maanagement API) to do the funky stuff without
+This is the v15+ version of the uSync command line util, it uses the ManagementAPI (and the uSync Management API) to do the funky stuff without
 you having to install anything on the server.
 
 ```
-dotnet tool install uSync.Cli --version 15.0.0-beta1
+dotnet tool install uSync.Cli
 ```
 
 ## Loads of useful commands for Umbraco !
@@ -16,7 +16,7 @@ In this beta, we have plugged in the 'useful' things you might need from the com
 rebuild indexes, models or caches, or run usync imports or exports.
 
 ```
-uSync CommandLine: 15.0.0-beta1
+uSync CommandLine: 17.0.0
 
 Description:
 
