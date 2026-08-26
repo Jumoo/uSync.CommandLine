@@ -30,11 +30,16 @@ public abstract class SyncCommandBase
 
     public SyncConnectionParameters GetConnectionPartameters(InvocationContext context)
     {
+        var clientId = context.ParseResult?.GetValueForOption(optionClientId) ?? Configuration["uSync:Command:ClientId"] ?? throw new Exception("No ClientId");
+        if (!clientId.StartsWith("umbraco-back-office"))
+        {
+            throw new Exception("ClientId does not start with 'umbraco-back-office'");
+        }
         return new SyncConnectionParameters
         {
             Url = GetServerUri(context) ?? throw new Exception("No host"),
             ClientSecret = context.ParseResult?.GetValueForOption(optionSecret) ?? Configuration["uSync:Command:Secret"] ?? throw new Exception("No Client Secret"),
-            ClientId = context.ParseResult?.GetValueForOption(optionClientId) ?? Configuration["uSync:Command:ClientId"] ?? throw new Exception("No ClientId")
+            ClientId = clientId
         };
     }
 

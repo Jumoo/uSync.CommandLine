@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -60,13 +61,13 @@ internal class CommandApplicationStartedHandler : INotificationAsyncHandler<Umbr
 
             await AddClientIdAndSecret();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Error adding clientId/Secret user for uSync.Commands");
         }
     }
 
-    private async Task AddClientIdAndSecret() 
+    private async Task AddClientIdAndSecret()
     {
         if (_configuration.GetValue("uSync:Command:AddIfMissing", false) is false)
         {
@@ -77,14 +78,19 @@ internal class CommandApplicationStartedHandler : INotificationAsyncHandler<Umbr
         var clientId = _configuration.GetValue("uSync:Command:ClientId", string.Empty);
         if (string.IsNullOrWhiteSpace(clientId))
         {
-            _logger.LogWarning("uSync.Command.Setup is enabled, but the config contains no clientId");
+            _logger.LogError("uSync.Command.Setup is enabled, but the config contains no clientId");
             return; // no client id in the config
+        }
+        if (!clientId.StartsWith("umbraco-back-office"))
+        {
+            _logger.LogError("uSync.Command.Setup is enabled, but clientId must start with 'umbraco-back-office'");
+            return; // client id does not contain necessary prefix
         }
 
         var clientSecret = _configuration.GetValue("uSync:Command:Secret", string.Empty);
         if (string.IsNullOrWhiteSpace(clientSecret))
         {
-            _logger.LogWarning("uSync.Command.Setup is enabled, but the config contains no clientSecret");
+            _logger.LogError("uSync.Command.Setup is enabled, but the config contains no clientSecret");
             return; // no client secret in the config
         }
 
@@ -107,20 +113,22 @@ internal class CommandApplicationStartedHandler : INotificationAsyncHandler<Umbr
 
         if (result.Success is false)
         {
-            _logger.LogWarning("uSync.Command.Setup was unable to create the user: {status}", result.Status);
+            _logger.LogError("uSync.Command.Setup was unable to create the user: {status}", result.Status);
             return; // didn't work. 
         }
 
         var userKey = result.Result.CreatedUser?.Key;
-        if (userKey is null) {
-            _logger.LogWarning("uSync.Command.Setup was unable to create the user: no user key returned");
+        if (userKey is null)
+        {
+            _logger.LogError("uSync.Command.Setup was unable to create the user: no user key returned");
             return;
         }
 
         // add the client id.
         var addClientIdResult = await _userService.AddClientIdAsync(userKey.Value, clientId);
-        if (addClientIdResult != UserClientCredentialsOperationStatus.Success) {
-            _logger.LogWarning("uSync.Command.Setup was unable to add the clientId to the user: {status}", addClientIdResult);
+        if (addClientIdResult != UserClientCredentialsOperationStatus.Success)
+        {
+            _logger.LogError("uSync.Command.Setup was unable to add the clientId to the user: {status}", addClientIdResult);
             return; // didn't work
         }
 
@@ -130,7 +138,7 @@ internal class CommandApplicationStartedHandler : INotificationAsyncHandler<Umbr
         var backOfficeApplicationManager = _serviceProvider.GetService<IBackOfficeApplicationManager>();
         if (backOfficeApplicationManager is null)
         {
-            _logger.LogWarning("uSync.Command.Setup was unable to add the client secret to the user: no IBackOfficeApplicationManager");
+            _logger.LogError("uSync.Command.Setup was unable to add the client secret to the user: no IBackOfficeApplicationManager");
             return;
         }
 
