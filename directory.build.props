@@ -5,17 +5,23 @@
 
 		<PackageTags>umbraco usync</PackageTags>
 
-		<Copyright>Jumoo @ 2024</Copyright>
+		<VersionPrefix>17.0.0</VersionPrefix>
 
-		<PackageReleaseNotes><![CDATA[15. Management API Release]]></PackageReleaseNotes>
-	
-		<IncludeSymbols>false</IncludeSymbols>
+		<Copyright>Jumoo @ 2024-2026</Copyright>
+
+		<PackageReleaseNotes><![CDATA[17. Umbraco 17 release]]></PackageReleaseNotes>
+
 		<IncludeSymbols>false</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
 		<IncludeBuildOutput>true</IncludeBuildOutput>
 
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+		<PackageProjectUrl>https://jumoo.co.uk</PackageProjectUrl>
 
+		<RepositoryUrl>https://github.com/Jumoo/uSync.CommandLine</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 	</PropertyGroup>
 </Project>

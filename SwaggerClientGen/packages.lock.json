@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "NSwag.CodeGeneration.CSharp": {
+        "type": "Direct",
+        "requested": "[14.4.0, )",
+        "resolved": "14.4.0",
+        "contentHash": "DMy+rUly1pXnRb2+5UQwp9+vUpeD6YFON9A9x98/cqQDhCw+FAs7z46Q9IC6itHHBkogX3K4QMABdC3dUixFJg==",
+        "dependencies": {
+          "NJsonSchema.CodeGeneration.CSharp": "11.3.2",
+          "NSwag.CodeGeneration": "14.4.0"
+        }
+      },
+      "Fluid.Core": {
+        "type": "Transitive",
+        "resolved": "2.24.0",
+        "contentHash": "R6O35JPDkqpj3rA7DBoGIzj03xxW5cORRX0kscoA1DnA3F8UnLNbuSVvrPa2CVblh28xMQlgqd0K0aFmwu5TAQ==",
+        "dependencies": {
+          "Microsoft.Extensions.FileProviders.Abstractions": "9.0.0",
+          "Parlot": "1.3.5",
+          "TimeZoneConverter": "7.0.0"
+        }
+      },
+      "Microsoft.Extensions.FileProviders.Abstractions": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "uK439QzYR0q2emLVtYzwyK3x+T5bTY4yWsd/k/ZUS9LR6Sflp8MIdhGXW8kQCd86dQD4tLqvcbLkku8qHY263Q==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "9.0.0"
+        }
+      },
+      "Microsoft.Extensions.Primitives": {
+        "type": "Transitive",
+        "resolved": "9.0.0",
+        "contentHash": "N3qEBzmLMYiASUlKxxFIISP4AiwuPTHF5uCh+2CWSwwzAJiIYx0kBJsS30cp1nvhSySFAVi30jecD307jV+8Kg=="
+      },
+      "Namotion.Reflection": {
+        "type": "Transitive",
+        "resolved": "3.4.2",
+        "contentHash": "ZHrvPdAg7zV78iOTiH9ua+34rBfn4iH6Bjfo2bzUHOGD3KkjGUvqxBFy+v9p6qwV+GEeYWl4NOqXH8tVcZOMpw=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+      },
+      "NJsonSchema": {
+        "type": "Transitive",
+        "resolved": "11.3.2",
+        "contentHash": "QXvelMLKz1NsMPc0HndaaxryNIV1V+AFYuZV9w3H6e+03jp3f3n1w8XLcIaA5WA51EHQdZEP4V2Bfgl6kpxDKg==",
+        "dependencies": {
+          "NJsonSchema.Annotations": "11.3.2",
+          "Namotion.Reflection": "3.4.2",
+          "Newtonsoft.Json": "13.0.3"
+        }
+      },
+      "NJsonSchema.Annotations": {
+        "type": "Transitive",
+        "resolved": "11.3.2",
+        "contentHash": "rSwQFKdLlq/lbAJfYqI5KBE46KJCbc99L6G9XM1nVpCOxE0eoaNE8+fkJ7Ws+I5VqP7oEPGKXTR3Q7PmYoeTDA=="
+      },
+      "NJsonSchema.CodeGeneration": {
+        "type": "Transitive",
+        "resolved": "11.3.2",
+        "contentHash": "iamZLbQFv5r+y5YWiNbHgSZ9WErCh8omfVBBsK9ka8suD/ylnAabYE+rOnXiQxwZqyUnx7u+ADmjccHbHE68zw==",
+        "dependencies": {
+          "Fluid.Core": "2.24.0",
+          "NJsonSchema": "11.3.2"
+        }
+      },
+      "NJsonSchema.CodeGeneration.CSharp": {
+        "type": "Transitive",
+        "resolved": "11.3.2",
+        "contentHash": "Afy+JFhlPe5nRmUlsEAT9M5Id9w9w5Cjb+rF5w3FofHjE8nibucZK1h8sVM3KM2Ql13I5wlzYZ1OZ6ze2R2sgA==",
+        "dependencies": {
+          "NJsonSchema.CodeGeneration": "11.3.2"
+        }
+      },
+      "NSwag.CodeGeneration": {
+        "type": "Transitive",
+        "resolved": "14.4.0",
+        "contentHash": "Pgu9Caz60HWEwNBsWV2hAWRzacliCrW28sXkNk90H0Q3z1prv1JjxUfRX7e4+afkKNrAcWJzeYdOaTwu5r55VQ==",
+        "dependencies": {
+          "NJsonSchema.CodeGeneration": "11.3.2",
+          "NSwag.Core": "14.4.0"
+        }
+      },
+      "NSwag.Core": {
+        "type": "Transitive",
+        "resolved": "14.4.0",
+        "contentHash": "Zo79LJPCJa2KcD2BblRGTQJp7c2ZduZZg0xeI+D8hmcfgHpuQhOHYdd2WSS+cYfO2sEZVtnsbrYM+SGvKvNMCw==",
+        "dependencies": {
+          "NJsonSchema": "11.3.2"
+        }
+      },
+      "Parlot": {
+        "type": "Transitive",
+        "resolved": "1.3.5",
+        "contentHash": "F22bBSTGJgzJBBngX7SmgPzbCjrzwt4sPIOUlQ/K9p3mvau+o0mGnDxYTTik7ODOjXBDalpsZacaa8eSnPoEFw=="
+      },
+      "TimeZoneConverter": {
+        "type": "Transitive",
+        "resolved": "7.0.0",
+        "contentHash": "sFbY65N/5GdsHx7nkdHFHUG+5Ar4W0w6Aks7Y2X+Q4NOTw6XyX2Il7jm+4tPkc//4mA3nG0RdxI8gKgoJitdLw=="
+      }
+    }
+  }
+}
