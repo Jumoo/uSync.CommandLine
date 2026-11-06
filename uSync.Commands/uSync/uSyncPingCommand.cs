@@ -34,6 +34,7 @@ public class uSyncPingCommand : ConnectedCommandBase, ISyncCommand
         {
             var retries = context.ParseResult.GetValueForOption<int?>(Retrys) ?? 10;
             var count = 0;
+            var connected = false;
 
             var auth = GetConnectionPartameters(context);
             client.BaseAddress = auth.Url;
@@ -46,6 +47,7 @@ public class uSyncPingCommand : ConnectedCommandBase, ISyncCommand
                 try
                 {
                     await AttemptConnection(auth);
+                    connected = true;
                     break;
                 }
                 catch
@@ -54,16 +56,16 @@ public class uSyncPingCommand : ConnectedCommandBase, ISyncCommand
                 }
             } while (count < retries);
 
-            if (count == retries)
-            {
-                await Writer.WriteLineAsync("Failed to ping server");
-            }
-            else
+            if (connected)
             {
                 await Writer.WriteLineAsync("Server responded - backoffice now active");
             }
+            else
+            {
+                await Writer.WriteLineAsync("Failed to ping server");
+            }
 
-            context.ExitCode = count == retries ? 1 : 0;
+            context.ExitCode = connected ? 0 : 1;
         });
     }
 
