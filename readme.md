@@ -91,7 +91,7 @@ you are running the uSync command line:
 or you can pass these on the command line. eg.
 
 ```
-uSyncCli usync-ping -s https://localhost:44359 -s [client_secret] -k [client_id]
+uSyncCli usync-ping -s https://localhost:44359 -k [client_secret] -i [client_id]
 ```
 
 ## Automagic Server discovery. 
