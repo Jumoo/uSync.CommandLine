@@ -35,7 +35,11 @@ internal static class BuildHelper
 
         // services.AddHttpClient();
 
-        services.AddSingleton<HttpClient>();
+        // uSync handlers (content and media especially) can take well over the
+        // default 100 seconds on a big site, so give each request longer.
+        // (set "uSync:Command:Timeout" in appsettings.json, e.g. "01:00:00", to change it)
+        var timeout = config.GetValue("uSync:Command:Timeout", TimeSpan.FromMinutes(30));
+        services.AddSingleton(new HttpClient { Timeout = timeout });
         services.AddSingleton<IConfiguration>(config);
         services.AddSingleton<TextWriter>(Console.Out);
 

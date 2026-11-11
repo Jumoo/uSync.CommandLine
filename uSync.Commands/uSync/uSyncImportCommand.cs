@@ -24,27 +24,14 @@ public class uSyncImportCommand : uSyncPerformCommandBase, ISyncCommand
         Command.SetHandler(async (context) =>
         {
             var force = context.ParseResult.GetValueForOption(this.force);
-            var set = context.ParseResult.GetValueForOption(this.set) ?? "default";
-            var group = context.ParseResult.GetValueForOption(this.group) ?? "all";
+            var request = CreateRequest(context, "Import", force);
 
-            var request = new PerformActionRequest
-            {
-                Action = "Import",
-                Options = new USyncOptions
-                {
-                    Set = set,
-                    Group = group,
-                    Force = force,
-                },
-                RequestId = Guid.NewGuid().ToString(),
-            };
-
-            // do the actual work on the thing. 
+            // do the actual work on the thing.
             var results = await Process(context, request);
 
             // do the results.
-            await DisplayResults("Imported",results);
-            context.ExitCode = 0;
+            await DisplayResults("Imported", results);
+            context.ExitCode = GetExitCode(results);
         });
     }
 }

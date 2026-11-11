@@ -15,8 +15,10 @@ public static class HttpClientExtensions
 
     public static async Task<string?> GetAccessToken(this HttpClient client, SyncConnectionParameters auth)
     {
-        client.BaseAddress = auth.Url;
-        var address = $"{client.BaseAddress}umbraco/management/api/v1/security/back-office/token";
+        // BaseAddress can't be changed once the client has sent a request,
+        // and we ask for new tokens part way through long running commands.
+        client.BaseAddress ??= auth.Url;
+        var address = $"{auth.Url}umbraco/management/api/v1/security/back-office/token";
         var tokenResponse = await client.RequestClientCredentialsTokenAsync(
             new ClientCredentialsTokenRequest
             {

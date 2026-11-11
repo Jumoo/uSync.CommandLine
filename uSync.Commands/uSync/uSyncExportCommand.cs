@@ -20,23 +20,12 @@ public class uSyncExportCommand : uSyncPerformCommandBase, ISyncCommand
         AddCoreOptions(Command);
         Command.SetHandler(async (context) =>
         {
-            var set = context.ParseResult.GetValueForOption(this.set) ?? "default";
-            var group = context.ParseResult.GetValueForOption(this.group) ?? "all";
-            var request = new PerformActionRequest
-            {
-                Action = "Export",
-                Options = new USyncOptions
-                {
-                    Set = set,
-                    Group = group,
-                },
-                RequestId = Guid.NewGuid().ToString(),
-            };
+            var request = CreateRequest(context, "Export");
             // do the actual work on the thing. 
             var results = await Process(context, request);
             // do the results.
             await DisplayResults("Exported", results);
-            context.ExitCode = 0;
+            context.ExitCode = GetExitCode(results);
         });
     }
 }

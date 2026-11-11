@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 
+using IdentityModel.Client;
+
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Diagnostics;
 
 using uSync.Management.Api;
 
@@ -10,10 +13,14 @@ namespace uSync.Commands.uSync;
 
 public abstract class uSyncPerformCommandBase : ConnectedCommandBase
 {
-    protected Option<string> set = new Option<string>(["--set", "-t"], "handler set to use (default : default)");
+    protected Option<string> set = new Option<string>(["--set", "-t"], "handler set to use (default : the site's default set)");
     protected Option<string> group = new Option<string>(["--group", "-g"], "handler group to use (default : all)");
 
-    public static string[] Dots = [ "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+    // the server works through one handler per request, there are ~20 handlers,
+    // so if we go round this many times something has gone wrong.
+    private const int MaxSteps = 100;
+
+    private static readonly TimeSpan TokenRefreshInterval = TimeSpan.FromMinutes(2);
 
     protected uSyncPerformCommandBase(
         TextWriter writer,
@@ -21,49 +28,156 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
         HttpClient client) : base(writer, configuration, client)
     { }
 
-    protected void Spinner(int count)
-    {
-        if (count % 10 == 0) 
-            Writer.Write(".");
-    }
+    /// <summary>
+    ///  build the request for an action.
+    /// </summary>
+    /// <remarks>
+    ///  RequestId is left empty so the server treats the first call as the start
+    ///  of a new run (raising the starting notifications and clearing caches),
+    ///  and returns the id we then use for every following step.
+    ///
+    ///  Set is left empty unless given, so the server uses its configured default
+    ///  set - set names are case sensitive on the server.
+    /// </remarks>
+    protected PerformActionRequest CreateRequest(InvocationContext context, string action, bool force = false)
+        => new()
+        {
+            Action = action,
+            RequestId = string.Empty,
+            Options = new USyncOptions
+            {
+                Set = context.ParseResult.GetValueForOption(set) ?? string.Empty,
+                Group = context.ParseResult.GetValueForOption(group) ?? "all",
+                Force = force,
+            },
+        };
 
-    protected async Task<PerformActionResponse> Process(InvocationContext context, PerformActionRequest request)
+    /// <summary>
+    ///  run the action on the server, one handler at a time.
+    /// </summary>
+    /// <returns>the final response, or null if the run failed part way.</returns>
+    protected async Task<PerformActionResponse?> Process(InvocationContext context, PerformActionRequest request)
     {
         var token = await GetToken(context);
         var uSyncClient = await GetUSyncClient(context, token);
 
         var auth = GetConnectionPartameters(context);
         var connectionId = await CreateSignalRClient(auth.Url.ToString(), token);
-        request.Options.ClientId = connectionId;
+        request.Options.ClientId = connectionId ?? string.Empty;
 
-        PerformActionResponse response;
-        int count = 0;
-        do
+        await Writer.WriteLineAsync($"{request.Action} : set '{DisplayValue(request.Options.Set, "(default)")}', group '{request.Options.Group}'{(request.Options.Force ? ", forced" : "")}");
+
+        PerformActionResponse? response = null;
+        var tokenAge = Stopwatch.StartNew();
+        while (request.StepNumber < MaxSteps)
         {
-            count++;
-            response = await uSyncClient.PerformActionAsync(request);
+            var handlerName = GetHandlerName(response, request.StepNumber);
 
-            Spinner(count);
+            try
+            {
+                // Umbraco access tokens only last 5 minutes by default, and a
+                // full import can easily run longer than that.
+                if (tokenAge.Elapsed > TokenRefreshInterval)
+                {
+                    Client.SetBearerToken(await GetToken(context));
+                    tokenAge.Restart();
+                }
 
-            var current = response.Status.FirstOrDefault(x => x.Status == HandlerStatus.Processing);
-            request.StepNumber = count;
+                response = await uSyncClient.PerformActionAsync(request);
+            }
+            catch (System.Exception ex)
+            {
+                await WriteStepError(request, handlerName, ex);
+                context.ExitCode = 1;
+                return null;
+            }
 
-        } while (response.Complete is false && count < 100);
+            if (response.InBackground)
+            {
+                await Writer.WriteLineAsync("The server is running this in the background (uSync ProcessingMode is 'Background').");
+                await Writer.WriteLineAsync("This command can't follow background runs yet - check the uSync dashboard or the site logs for the results.");
+                return response;
+            }
 
-        return response;
+            await WriteStepProgress(response, request.StepNumber);
+
+            if (response.Complete) return response;
+
+            request.RequestId = response.RequestId;
+            request.StepNumber++;
+        }
+
+        await Writer.WriteLineAsync($"ERROR: {request.Action} did not complete after {MaxSteps} steps, stopping.");
+        context.ExitCode = 1;
+        return null;
     }
 
-    protected async Task DisplayResults(string action, PerformActionResponse results)
+    private static string? GetHandlerName(PerformActionResponse? response, int step)
+        => response?.Status?.ElementAtOrDefault(step)?.Name;
+
+    private async Task WriteStepProgress(PerformActionResponse response, int step)
     {
-        // display some results. 
-        var changes = results.Status.Sum(x => x.Changes);
+        var handlers = response.Status?.ToList() ?? [];
+        if (step >= handlers.Count) return; // final (tidy up) step
+
+        var handler = handlers[step];
+        var error = handler.InError ? "  (errors)" : "";
+        await Writer.WriteLineAsync($"   [{step + 1,2}/{handlers.Count}] {handler.Name,-20} : {handler.Changes}{error}");
+    }
+
+    private async Task WriteStepError(PerformActionRequest request, string? handlerName, System.Exception ex)
+    {
+        var name = handlerName ?? (request.StepNumber == 0 ? "first handler" : "final steps");
+        await Writer.WriteLineAsync();
+        await Writer.WriteLineAsync($"ERROR: {request.Action} failed on step {request.StepNumber + 1} ({name}).");
+
+        var message = ex switch
+        {
+            TaskCanceledException => $"The request timed out after {Client.Timeout}. (set uSync:Command:Timeout in appsettings.json to allow longer)",
+            ApiException apiEx => $"The server returned {apiEx.StatusCode}: {Truncate(apiEx.Response)}",
+            _ => ex.Message
+        };
+
+        await Writer.WriteLineAsync($"   {message}");
+        await Writer.WriteLineAsync("   Steps after this one did not run. Check the site logs for details.");
+    }
+
+    protected async Task DisplayResults(string action, PerformActionResponse? results)
+    {
+        if (results is null || results.InBackground) return;
+
+        var handlers = results.Status ?? [];
+        var changes = handlers.Sum(x => x.Changes);
         await Writer.WriteLineAsync($"{action} : {changes} changes");
 
-        foreach (var item in results.Status)
+        var failed = results.Actions?.Where(x => x.Success is false).ToList() ?? [];
+        if (failed.Count > 0)
         {
-            await Writer.WriteLineAsync($"   {item.Name,-20} : {item.Changes}");
+            await Writer.WriteLineAsync($"{failed.Count} item(s) failed:");
+            foreach (var item in failed)
+            {
+                await Writer.WriteLineAsync($"   {item.Handler} : {item.Name} - {item.Message}");
+            }
         }
     }
+
+    /// <summary>
+    ///  exit code for a completed run - non zero if any handler or item failed.
+    /// </summary>
+    protected static int GetExitCode(PerformActionResponse? results)
+    {
+        if (results is null) return 1;
+        if (results.InBackground) return 0;
+        if (results.Status?.Any(x => x.InError) is true) return 1;
+        if (results.Actions?.Any(x => x.Success is false) is true) return 1;
+        return 0;
+    }
+
+    private static string DisplayValue(string? value, string fallback)
+        => string.IsNullOrWhiteSpace(value) ? fallback : value;
+
+    private static string Truncate(string? value, int length = 500)
+        => value is null ? "" : value.Length <= length ? value : value[..length] + "...";
 
     protected async Task<string?> CreateSignalRClient(string host,string? token)
     {
