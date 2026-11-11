@@ -6,6 +6,7 @@ using IdentityModel.Client;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Diagnostics;
+using System.Text.Json;
 
 using uSync.Management.Api;
 
@@ -134,13 +135,57 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
         var message = ex switch
         {
             TaskCanceledException => $"The request timed out after {Client.Timeout}. (set uSync:Command:Timeout in appsettings.json to allow longer)",
-            ApiException apiEx => $"The server returned {apiEx.StatusCode}: {Truncate(apiEx.Response)}",
+            ApiException apiEx => GetApiErrorMessage(apiEx),
             _ => ex.Message
         };
 
         await Writer.WriteLineAsync($"   {message}");
-        await Writer.WriteLineAsync("   Steps after this one did not run. Check the site logs for details.");
+        await Writer.WriteLineAsync($"   Steps after this one did not run. The site log will have the full error (search for '{name}' or 'uSync').");
     }
+
+    /// <summary>
+    ///  make the most of what the server sent back with an error.
+    /// </summary>
+    /// <remarks>
+    ///  Umbraco returns ProblemDetails (title / detail) for errors it handles,
+    ///  but an unhandled exception comes back as a bare 500 with no body.
+    /// </remarks>
+    private static string GetApiErrorMessage(ApiException ex)
+    {
+        var status = ex.StatusCode switch
+        {
+            401 => "401 (Unauthorized) - the access token was rejected, check the client id and secret",
+            403 => "403 (Forbidden) - the API user does not have access to uSync (it needs access to the Settings section)",
+            404 => "404 (Not Found) - is uSync installed on the site, and is the server url right?",
+            500 => "500 (Internal Server Error)",
+            _ => ex.StatusCode.ToString()
+        };
+
+        if (string.IsNullOrWhiteSpace(ex.Response))
+            return $"The server returned {status} without any details.";
+
+        try
+        {
+            using var json = JsonDocument.Parse(ex.Response);
+            var title = GetString(json.RootElement, "title");
+            var detail = GetString(json.RootElement, "detail");
+            if (title is not null || detail is not null)
+                return $"The server returned {status}: {string.Join(" - ", new[] { title, detail }.Where(x => x is not null))}";
+        }
+        catch (JsonException)
+        {
+            // not json, fall through and show the raw response.
+        }
+
+        return $"The server returned {status}: {Truncate(ex.Response)}";
+    }
+
+    private static string? GetString(JsonElement element, string name)
+        => element.ValueKind == JsonValueKind.Object
+            && element.TryGetProperty(name, out var value)
+            && value.ValueKind == JsonValueKind.String
+            && string.IsNullOrWhiteSpace(value.GetString()) is false
+                ? value.GetString() : null;
 
     protected async Task DisplayResults(string action, PerformActionResponse? results)
     {
