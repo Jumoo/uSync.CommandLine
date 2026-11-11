@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Umbraco.Cms" Version="17.6.2" />
-	  <PackageReference Include="uSync" Version="17.3.8" />
+    <PackageReference Include="Umbraco.Cms" Version="17.8.1" />
+	  <PackageReference Include="uSync" Version="17.6.2" />
 	  <ProjectReference Include="..\uSync.Command.Setup\uSync.Command.Setup.csproj" /> 
   </ItemGroup>
 
