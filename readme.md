@@ -94,6 +94,27 @@ or you can pass these on the command line. eg.
 uSyncCli usync-ping -s https://localhost:44359 -k [client_secret] -i [client_id]
 ```
 
+## Imports and exports
+
+`usync-import` and `usync-export` run one handler per request and print each handler as it completes.
+If a step fails, the command says which handler failed and why, and exits with a non-zero code, so
+build pipelines can spot a run that stopped part way. A run where any item fails to import also
+exits non-zero.
+
+Without `--set`, the site's default handler set is used. Set names are case sensitive (`--set Default`).
+
+Each request has a 30 minute timeout. To change it, add `Timeout` to the appsettings.json:
+
+```json
+{
+  "uSync": {
+    "Command": {
+      "Timeout": "01:00:00"
+    }
+  }
+}
+```
+
 ## Automagic Server discovery. 
 if you place the uSync:Command settings in the appsettings.json file of a site. then if you run the uSync command 
 from within the site directory it will attempt to workout the server Url, 

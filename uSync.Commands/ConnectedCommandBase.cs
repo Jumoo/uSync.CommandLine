@@ -47,7 +47,6 @@ public class ConnectedCommandBase : SyncCommandBase
     protected async Task<string> GetToken(InvocationContext context)
     {
         var auth = GetConnectionPartameters(context);
-        Client.BaseAddress = auth.Url;
         var token = await Client.GetAccessToken(auth);
         if (token is null)
         {
