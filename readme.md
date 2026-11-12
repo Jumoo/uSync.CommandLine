@@ -115,6 +115,16 @@ Each request has a 30 minute timeout. To change it, add `Timeout` to the appsett
 }
 ```
 
+### Background processing
+
+If the site has uSync's `ProcessingMode` set to `Background` (uSync 17.4.0 or later), the server runs the
+whole import or export as one background job. The command polls the server for progress, prints each
+handler as it finishes, and exits with the same results and exit codes as a normal run.
+
+Each poll is a short request, so the timeout above doesn't limit how long the whole run takes. It's
+used as the longest the command will wait for the next handler to finish before deciding the run has
+stalled. Stopping the command doesn't stop the run on the server.
+
 ## Automagic Server discovery. 
 if you place the uSync:Command settings in the appsettings.json file of a site. then if you run the uSync command 
 from within the site directory it will attempt to workout the server Url, 

@@ -23,6 +23,11 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
 
     private static readonly TimeSpan TokenRefreshInterval = TimeSpan.FromMinutes(2);
 
+    // how often to ask the server how a background run is getting on, and how
+    // many polls in a row can fail (~1 minute) before we give up following it.
+    private static readonly TimeSpan BackgroundPollInterval = TimeSpan.FromSeconds(3);
+    private const int MaxBackgroundPollFailures = 20;
+
     protected uSyncPerformCommandBase(
         TextWriter writer,
         IConfiguration configuration,
@@ -94,10 +99,15 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
             }
 
             if (response.InBackground)
+                return await FollowBackgroundRun(context, uSyncClient, request, response, tokenAge);
+
+            // the server answers with just a message when it can't start the run
+            // (e.g. a background run of the same action is already going).
+            if (string.IsNullOrWhiteSpace(response.Message) is false && (response.Status?.Count ?? 0) == 0)
             {
-                await Writer.WriteLineAsync("The server is running this in the background (uSync ProcessingMode is 'Background').");
-                await Writer.WriteLineAsync("This command can't follow background runs yet - check the uSync dashboard or the site logs for the results.");
-                return response;
+                await Writer.WriteLineAsync($"ERROR: {response.Message}");
+                context.ExitCode = 1;
+                return null;
             }
 
             await WriteStepProgress(response, request.StepNumber);
@@ -113,6 +123,118 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
         return null;
     }
 
+    /// <summary>
+    ///  follow a run the server is doing in the background (uSync ProcessingMode
+    ///  'Background', uSync 17.4.0+), by polling its status until it finishes.
+    /// </summary>
+    /// <remarks>
+    ///  each poll is a short request, so the request timeout doesn't limit how
+    ///  long the run can take. Stopping the command doesn't stop the run.
+    /// </remarks>
+    private async Task<PerformActionResponse?> FollowBackgroundRun(
+        InvocationContext context,
+        uSyncClient uSyncClient,
+        PerformActionRequest request,
+        PerformActionResponse started,
+        Stopwatch tokenAge)
+    {
+        if (string.IsNullOrWhiteSpace(started.OperationId))
+        {
+            await Writer.WriteLineAsync("The server is running this in the background, but didn't return an operation id to follow.");
+            await Writer.WriteLineAsync("Following background runs needs uSync 17.4.0 or later on the site - check the uSync dashboard or the site logs for the results.");
+            return started;
+        }
+
+        await Writer.WriteLineAsync($"   running in the background on the server (operation {started.OperationId})");
+
+        var reported = new HashSet<int>();
+        var failures = 0;
+
+        // same limit as a handler gets in normal mode: if no handler finishes
+        // within the request timeout, the run has stalled on the server.
+        var sinceProgress = Stopwatch.StartNew();
+
+        while (true)
+        {
+            await Task.Delay(BackgroundPollInterval);
+
+            SyncOperationStatusResponse status;
+            try
+            {
+                if (tokenAge.Elapsed > TokenRefreshInterval)
+                {
+                    Client.SetBearerToken(await GetToken(context));
+                    tokenAge.Restart();
+                }
+
+                status = await uSyncClient.GetOperationStatusAsync(started.OperationId);
+                failures = 0;
+            }
+            catch (System.Exception ex)
+            {
+                // a blip (or the site restarting) shouldn't lose a long run.
+                if (++failures < MaxBackgroundPollFailures) continue;
+
+                await Writer.WriteLineAsync();
+                await Writer.WriteLineAsync($"ERROR: lost contact with the server while following the {request.Action}.");
+                await Writer.WriteLineAsync($"   {(ex is ApiException apiEx ? GetApiErrorMessage(apiEx) : ex.Message)}");
+                await Writer.WriteLineAsync("   The run may still be going - check the uSync dashboard or the site logs.");
+                context.ExitCode = 1;
+                return null;
+            }
+
+            if (await WriteBackgroundProgress(status, reported))
+                sinceProgress.Restart();
+
+            if (status.Complete is false)
+            {
+                if (sinceProgress.Elapsed <= Client.Timeout) continue;
+
+                await Writer.WriteLineAsync();
+                await Writer.WriteLineAsync($"ERROR: no progress from the server in {Client.Timeout}, stopping. (set uSync:Command:Timeout in appsettings.json to allow longer)");
+                await Writer.WriteLineAsync("   The run may still be going - check the uSync dashboard or the site logs.");
+                context.ExitCode = 1;
+                return null;
+            }
+
+            if (status.OperationStatus != "Success")
+            {
+                await Writer.WriteLineAsync();
+                await Writer.WriteLineAsync($"ERROR: {request.Action} did not complete ({status.OperationStatus}).");
+                if (string.IsNullOrWhiteSpace(status.Message) is false)
+                    await Writer.WriteLineAsync($"   {status.Message}");
+                context.ExitCode = 1;
+                return null;
+            }
+
+            return new PerformActionResponse
+            {
+                RequestId = status.RequestId ?? started.RequestId,
+                Status = status.Status ?? [],
+                Actions = status.Actions ?? [],
+                Complete = true,
+            };
+        }
+    }
+
+    /// <summary>
+    ///  write out each handler once it has finished.
+    /// </summary>
+    /// <returns>true if any handler finished since the last poll.</returns>
+    private async Task<bool> WriteBackgroundProgress(SyncOperationStatusResponse status, HashSet<int> reported)
+    {
+        var progressed = false;
+        var handlers = status.Status?.ToList() ?? [];
+        for (var n = 0; n < handlers.Count; n++)
+        {
+            if (handlers[n].Status is not (HandlerStatus.Complete or HandlerStatus.Error)) continue;
+            if (reported.Add(n) is false) continue;
+            await WriteHandler(handlers[n], n, handlers.Count);
+            progressed = true;
+        }
+        return progressed;
+    }
+
     private static string? GetHandlerName(PerformActionResponse? response, int step)
         => response?.Status?.ElementAtOrDefault(step)?.Name;
 
@@ -121,9 +243,13 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
         var handlers = response.Status?.ToList() ?? [];
         if (step >= handlers.Count) return; // final (tidy up) step
 
-        var handler = handlers[step];
+        await WriteHandler(handlers[step], step, handlers.Count);
+    }
+
+    private async Task WriteHandler(SyncHandlerSummary handler, int index, int count)
+    {
         var error = handler.InError ? "  (errors)" : "";
-        await Writer.WriteLineAsync($"   [{step + 1,2}/{handlers.Count}] {handler.Name,-20} : {handler.Changes}{error}");
+        await Writer.WriteLineAsync($"   [{index + 1,2}/{count}] {handler.Name,-20} : {handler.Changes}{error}");
     }
 
     private async Task WriteStepError(PerformActionRequest request, string? handlerName, System.Exception ex)
