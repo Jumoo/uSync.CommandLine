@@ -1,21 +1,13 @@
 name: CodeQL
 
 on:
-  push:
-    branches: [ "main", "*/main" ]
-    paths-ignore:
-      - "**.md"
-  pull_request:
-    branches: [ "main", "*/main" ]
-    paths-ignore:
-      - "**.md"
   schedule:
     # weekly, so advisories published after a change still get picked up
     - cron: "33 8 * * 0"
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
