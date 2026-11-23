@@ -47,18 +47,18 @@ public abstract class SyncCommandBase
         var clientId = context.ParseResult?.GetValueForOption(optionClientId)
             ?? FromEnvironment(ClientIdEnvironmentVariable)
             ?? Configuration["uSync:Command:ClientId"]
-            ?? throw new Exception($"No client id: use --client-id, set {ClientIdEnvironmentVariable}, or uSync:Command:ClientId in appsettings.json");
+            ?? throw new SyncUsageException($"No client id: use --client-id, set {ClientIdEnvironmentVariable}, or uSync:Command:ClientId in appsettings.json");
         if (!clientId.StartsWith("umbraco-back-office"))
         {
-            throw new Exception("ClientId does not start with 'umbraco-back-office'");
+            throw new SyncUsageException($"The client id '{clientId}' does not start with 'umbraco-back-office' - API user client ids in Umbraco always do.");
         }
         return new SyncConnectionParameters
         {
-            Url = GetServerUri(context) ?? throw new Exception($"No server: use --server-url, set {ServerEnvironmentVariable}, or uSync:Command:ServerUrl in appsettings.json"),
+            Url = GetServerUri(context) ?? throw new SyncUsageException($"No server: use --server-url, set {ServerEnvironmentVariable}, or uSync:Command:ServerUrl in appsettings.json"),
             ClientSecret = context.ParseResult?.GetValueForOption(optionSecret)
                 ?? FromEnvironment(ClientSecretEnvironmentVariable)
                 ?? Configuration["uSync:Command:Secret"]
-                ?? throw new Exception($"No client secret: use --secret, set {ClientSecretEnvironmentVariable}, or uSync:Command:Secret in appsettings.json"),
+                ?? throw new SyncUsageException($"No client secret: use --secret, set {ClientSecretEnvironmentVariable}, or uSync:Command:Secret in appsettings.json"),
             ClientId = clientId
         };
     }
@@ -80,7 +80,7 @@ public abstract class SyncCommandBase
             // the api paths are added straight on to the url, so it needs to end with a /
             if (fromEnvironment.EndsWith('/') is false) fromEnvironment += "/";
             if (Uri.TryCreate(fromEnvironment, UriKind.Absolute, out var environmentUri)) return environmentUri;
-            throw new Exception($"{ServerEnvironmentVariable} is not a valid url");
+            throw new SyncUsageException($"{ServerEnvironmentVariable} is not a valid url");
         }
 
         uri = GetServerUriFromConfig("uSync:Command:ServerUrl");

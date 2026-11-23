@@ -32,7 +32,10 @@ internal static class BuildHelper
             .RegisterWithDotnetSuggest()
             .UseTypoCorrections()
             .UseParseErrorReporting(2)
-            .UseExceptionHandler()
+            // one line errors, not stack traces: exit 2 for usage / config
+            // problems, 1 for run time failures (USYNC_DEBUG=1 for the stack).
+            .UseExceptionHandler((ex, context) =>
+                context.ExitCode = SyncCommandErrors.Handle(ex, Console.Error))
             .CancelOnProcessTermination()
             .Build();
     }

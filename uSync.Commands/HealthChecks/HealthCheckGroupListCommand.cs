@@ -8,7 +8,7 @@ namespace uSync.Commands.HealthChecks;
 
 public class HealthCheckGroupListCommand : ConnectedCommandBase, ISyncCommand
 {
-    protected Option<string> indexName = new Option<string>(new string[] { "--group", "-g" }, "Group name of health check group to list");
+    protected Option<string> indexName = new Option<string>(new string[] { "--group", "-g" }, "Group name of health check group to list") { IsRequired = true };
     public Command Command { get; }
     public HealthCheckGroupListCommand(
         TextWriter writer,
@@ -23,7 +23,7 @@ public class HealthCheckGroupListCommand : ConnectedCommandBase, ISyncCommand
             var umbracoClient = await GetUmbracoClient(context);
 
             var groupName = context.ParseResult.GetValueForOption(this.indexName) ??
-                throw new Exception("No group-name given");
+                throw new SyncUsageException("No group given, use --group");
 
             var healthCheckGroup = await umbracoClient.GetHealthCheckGroupByNameAsync(groupName);
 

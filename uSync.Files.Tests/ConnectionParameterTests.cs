@@ -88,7 +88,7 @@ public class ConnectionParameterTests
     public void Missing_Secret_Says_Where_To_Set_It_Without_Echoing_Values()
     {
         var environment = new Dictionary<string, string?>(Environment) { ["USYNC_CLIENT_SECRET"] = null };
-        var ex = Assert.Throws<Exception>(() => Get([], environment));
+        var ex = Assert.Throws<SyncUsageException>(() => Get([], environment));
         Assert.That(ex!.Message, Does.Contain("USYNC_CLIENT_SECRET"));
     }
 }

@@ -18,6 +18,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\uSync.Files\uSync.Files.csproj" />
 		<ProjectReference Include="..\uSync.Commands.Core\uSync.Commands.Core.csproj" />
+		<ProjectReference Include="..\uSync.Commands\uSync.Commands.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
