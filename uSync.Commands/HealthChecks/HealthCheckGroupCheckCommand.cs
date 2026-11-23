@@ -26,17 +26,23 @@ public class HealthCheckGroupCheckCommand : ConnectedCommandBase, ISyncCommand
 
             var healthCheckGroup = await umbracoClient.PostHealthCheckGroupByNameCheckAsync(groupName);
 
+            var errors = 0;
             foreach (var check in healthCheckGroup.Checks)
             {
                 await writer.WriteLineAsync($" [{check.Id}]");
 
-                foreach (var result in check.Results)
+                foreach (var result in check.Results ?? [])
                 {
+                    if (result.ResultType == Umbraco.Management.Api.StatusResultTypeModel.Error) errors++;
                     await writer.WriteLineAsync($"  {result.ResultType} : {result.Message}");
                 }
             }
 
-            context.ExitCode = 0;
+            // non-zero on any error, so a pipeline step fails.
+            if (errors > 0)
+                await writer.WriteLineAsync($"{errors} health check result(s) in '{groupName}' are errors.");
+
+            context.ExitCode = errors > 0 ? 1 : 0;
         });
     }
 }
