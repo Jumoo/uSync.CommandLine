@@ -56,6 +56,9 @@ public class SyncFolderVerifier
     private static readonly HashSet<string> NodeNameFolders =
         new(["Content", "Media", "Blueprints", "ContentTemplates"], StringComparer.OrdinalIgnoreCase);
 
+    private static readonly HashSet<string> BlueprintFolders =
+        new(["Blueprints", "ContentTemplates"], StringComparer.OrdinalIgnoreCase);
+
     /// <summary>
     ///  folders uSync and its add-ons write. Other folders are fine when their
     ///  files look like uSync items (have a Key), so custom handlers don't warn.
@@ -344,8 +347,10 @@ public class SyncFolderVerifier
             foreach (var composition in compositions)
                 yield return (composition, "composition", ReadKey(composition.Attribute("Key")?.Value), composition.Value);
 
+            // a blueprint's parent is a blueprint folder (a container), which
+            // uSync doesn't write a file for.
             var parent = info.Element("Parent");
-            if (parent is not null)
+            if (parent is not null && BlueprintFolders.Contains(item.TypeFolder) is false)
                 yield return (parent, "parent", ReadKey(parent.Attribute("Key")?.Value), parent.Value);
 
             var templates = info.Element("AllowedTemplates")?.Elements("Template") ?? [];
