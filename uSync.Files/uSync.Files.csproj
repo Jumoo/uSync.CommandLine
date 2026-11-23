@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!--
+		uSync folder checks, with no Umbraco, HTTP or command line dependencies
+		(BCL + System.Xml.Linq only) so the same code can be shared with the
+		uSync health checks later.
+	-->
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+</Project>
