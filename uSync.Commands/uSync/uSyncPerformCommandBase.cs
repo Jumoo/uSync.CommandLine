@@ -8,6 +8,7 @@ using System.CommandLine.Invocation;
 using System.Diagnostics;
 using System.Text.Json;
 
+using uSync.Commands.Core.Output;
 using uSync.Management.Api;
 
 namespace uSync.Commands.uSync;
@@ -329,6 +330,97 @@ public abstract class uSyncPerformCommandBase : ConnectedCommandBase
             {
                 await Writer.WriteLineAsync($"   {item.Handler} : {item.Name} - {item.Message}");
             }
+        }
+    }
+
+    /// <summary>
+    ///  item changes that aren't worth listing (nothing happened, or just information).
+    /// </summary>
+    private static readonly HashSet<ChangeType> QuietChanges =
+        [ChangeType.NoChange, ChangeType.Hidden, ChangeType.Information, ChangeType.Clean];
+
+    protected static List<USyncActionView> GetChangedItems(PerformActionResponse? results)
+        => results?.Actions?
+            .Where(x => QuietChanges.Contains(x.Change) is false || x.Success is false)
+            .OrderBy(x => x.Handler)
+            .ThenBy(x => x.Name)
+            .ToList() ?? [];
+
+    /// <summary>
+    ///  list each item that would change (or did), one per line.
+    /// </summary>
+    protected async Task DisplayChangedItems(PerformActionResponse? results)
+    {
+        foreach (var item in GetChangedItems(results))
+        {
+            var message = string.IsNullOrWhiteSpace(item.Message) ? "" : $" - {item.Message}";
+            await Writer.WriteLineAsync($"   {item.Change,-12} {item.Handler} : {item.Name}{message}");
+        }
+    }
+
+    private const int MaxSummaryRows = 200;
+
+    /// <summary>
+    ///  add a markdown table of the run to the GitHub job summary,
+    ///  when $GITHUB_STEP_SUMMARY is set.
+    /// </summary>
+    protected void WriteStepSummary(string title, PerformActionResponse? results, string serverUrl)
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(StepSummary.EnvironmentVariable))) return;
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"### uSync {title}");
+        sb.AppendLine();
+
+        if (results is null)
+        {
+            sb.AppendLine($":x: {title} against `{StepSummary.Cell(serverUrl)}` failed - see the log for details.");
+            StepSummary.TryAppend(sb.ToString());
+            return;
+        }
+
+        var items = GetChangedItems(results);
+        var failed = items.Count(x => x.Success is false);
+        var changes = results.Status?.Sum(x => x.Changes) ?? 0;
+        var icon = failed > 0 || results.Status?.Any(x => x.InError) is true ? ":warning:" : ":white_check_mark:";
+        sb.AppendLine($"{icon} {title} against `{StepSummary.Cell(serverUrl)}`: {changes} change(s){(failed > 0 ? $", {failed} failed" : "")}.");
+        sb.AppendLine();
+
+        var handlers = results.Status?.Where(x => x.Changes > 0 || x.InError).ToList() ?? [];
+        if (handlers.Count > 0)
+        {
+            sb.AppendLine("| Handler | Changes | |");
+            sb.AppendLine("|---|---|---|");
+            foreach (var handler in handlers)
+                sb.AppendLine($"| {StepSummary.Cell(handler.Name)} | {handler.Changes} | {(handler.InError ? ":x: errors" : "")} |");
+            sb.AppendLine();
+        }
+
+        if (items.Count > 0)
+        {
+            sb.AppendLine("<details><summary>Items</summary>");
+            sb.AppendLine();
+            sb.AppendLine("| Type | Item | Change | Message |");
+            sb.AppendLine("|---|---|---|---|");
+            foreach (var item in items.Take(MaxSummaryRows))
+            {
+                var change = item.Success ? item.Change.ToString() : $":x: {item.Change}";
+                sb.AppendLine($"| {StepSummary.Cell(item.Handler)} | {StepSummary.Cell(item.Name)} | {change} | {StepSummary.Cell(item.Message)} |");
+            }
+            if (items.Count > MaxSummaryRows)
+                sb.AppendLine($"| | ... and {items.Count - MaxSummaryRows} more | | |");
+            sb.AppendLine();
+            sb.AppendLine("</details>");
+            sb.AppendLine();
+        }
+
+        try
+        {
+            StepSummary.TryAppend(sb.ToString());
+        }
+        catch (IOException ex)
+        {
+            Writer.WriteLine($"Could not write the step summary: {ex.Message}");
         }
     }
 

@@ -21,7 +21,23 @@ internal static class BuildHelper
             commandLineBuilder.Command.Add(command.Command);
         }
 
-        return commandLineBuilder.UseDefaults().Build();
+        // UseDefaults, except bad arguments exit with 2 (the tool failed)
+        // rather than 1, so a pipeline can tell them from failed checks.
+        return commandLineBuilder
+            .UseVersionOption()
+            .UseHelp()
+            .UseEnvironmentVariableDirective()
+            .UseParseDirective()
+            .UseSuggestDirective()
+            .RegisterWithDotnetSuggest()
+            .UseTypoCorrections()
+            .UseParseErrorReporting(2)
+            // one line errors, not stack traces: exit 2 for usage / config
+            // problems, 1 for run time failures (USYNC_DEBUG=1 for the stack).
+            .UseExceptionHandler((ex, context) =>
+                context.ExitCode = SyncCommandErrors.Handle(ex, Console.Error))
+            .CancelOnProcessTermination()
+            .Build();
     }
 
     public static ServiceProvider BuildServiceProvider(

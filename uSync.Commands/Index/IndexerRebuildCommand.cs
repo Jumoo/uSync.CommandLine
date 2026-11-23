@@ -8,7 +8,7 @@ namespace uSync.Commands.Index;
 
 public class IndexerRebuildCommand : ConnectedCommandBase, ISyncCommand
 {
-    protected Option<string> indexName = new Option<string>(new string[] { "--index", "-n" }, "the name of the index to rebuild");
+    protected Option<string> indexName = new Option<string>(new string[] { "--index", "-n" }, "the name of the index to rebuild") { IsRequired = true };
 
     public Command Command { get; }
     public IndexerRebuildCommand(
@@ -25,7 +25,7 @@ public class IndexerRebuildCommand : ConnectedCommandBase, ISyncCommand
             var umbracoClient = await GetUmbracoClient(context);
 
             var indexName = context.ParseResult.GetValueForOption(this.indexName) ??
-                throw new Exception("No index name given");
+                throw new SyncUsageException("No index given, use --index");
 
             await umbracoClient.PostIndexerByIndexNameRebuildAsync(indexName);
             await writer.WriteLineAsync($"Indexer [{indexName}] Rebuild Requested");

@@ -8,7 +8,7 @@ namespace uSync.Commands.HealthChecks;
 
 public class HealthCheckGroupCheckCommand : ConnectedCommandBase, ISyncCommand
 {
-    protected Option<string> indexName = new Option<string>(new string[] { "--group", "-g" }, "Group name of health check group to list");
+    protected Option<string> indexName = new Option<string>(new string[] { "--group", "-g" }, "Group name of health check group to list") { IsRequired = true };
     public Command Command { get; }
     public HealthCheckGroupCheckCommand(
         TextWriter writer,
@@ -22,21 +22,27 @@ public class HealthCheckGroupCheckCommand : ConnectedCommandBase, ISyncCommand
         {
             var umbracoClient = await GetUmbracoClient(context);
             var groupName = context.ParseResult.GetValueForOption(this.indexName) ??
-                throw new Exception("No group-name given");
+                throw new SyncUsageException("No group given, use --group");
 
             var healthCheckGroup = await umbracoClient.PostHealthCheckGroupByNameCheckAsync(groupName);
 
+            var errors = 0;
             foreach (var check in healthCheckGroup.Checks)
             {
                 await writer.WriteLineAsync($" [{check.Id}]");
 
-                foreach (var result in check.Results)
+                foreach (var result in check.Results ?? [])
                 {
+                    if (result.ResultType == Umbraco.Management.Api.StatusResultTypeModel.Error) errors++;
                     await writer.WriteLineAsync($"  {result.ResultType} : {result.Message}");
                 }
             }
 
-            context.ExitCode = 0;
+            // non-zero on any error, so a pipeline step fails.
+            if (errors > 0)
+                await writer.WriteLineAsync($"{errors} health check result(s) in '{groupName}' are errors.");
+
+            context.ExitCode = errors > 0 ? 1 : 0;
         });
     }
 }

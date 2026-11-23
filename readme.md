@@ -29,6 +29,7 @@ Options:
 
 Commands:
   test                     Test command
+  files-verify             Check the uSync folder for problems (merge conflicts, clashes, broken files). Offline, no server needed.
   user-current             Fetch the user executing the commands
   user-list                List all users
   cache-rebuild            Rebuild the cache on the server
@@ -43,7 +44,8 @@ Commands:
   usync-settings           List all settings
   usync-import             Import all items
   usync-export             Export all items
-  usync-ping               Ping the Umbraco server until it responds
+  usync-ping               Wait for the site to answer (e.g. after a deploy)
+  usync-report             Report what an import would change (dry run)
 ```
 
 e.g
@@ -93,6 +95,111 @@ or you can pass these on the command line. eg.
 ```
 uSyncCli usync-ping -s https://localhost:44359 -k [client_secret] -i [client_id]
 ```
+
+or set them as environment variables, which keeps the secret off the command line (and out of build logs):
+
+| Variable | Same as |
+|---|---|
+| `USYNC_SERVER` | `-s` / `--server-url` |
+| `USYNC_CLIENT_ID` | `-i` / `--client-id` |
+| `USYNC_CLIENT_SECRET` | `-k` / `--secret` |
+
+The command line wins, then the environment variables, then appsettings.json.
+
+## Checking the uSync files (`files-verify`)
+
+`files-verify` checks the uSync folder in your repo without a site, database or keys, so it can run
+on every pull request (or in a pre-commit hook) and stop bad files before they reach a server.
+
+```
+uSyncCli files-verify
+```
+
+It finds the uSync folder the same way the site does: `uSync:Settings:Folders` (the last one) or
+`uSync:Settings:RootFolder` from `appsettings.json`, else the highest `uSync/v{n}` folder. It looks in the
+current folder and site folders up to three levels below it. Use `--folder` to point at it.
+
+**Errors** (exit 1):
+
+| Id | Check |
+|---|---|
+| USYNC001 | Merge conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`, `\|\|\|\|\|\|\|`) in any file. Found in the raw text, because markers inside a CDATA block (block list JSON, rich text) still parse as valid XML and would be imported as they are. |
+| USYNC002 | A `.config` file that isn't valid XML. |
+| USYNC003 | Two files of the same type with the same `Key`. |
+| USYNC004 | Two items of the same type with the same `Alias` and different `Key`s - e.g. two branches that each added an `article` doc type. Not checked for content and media, where the alias is the node name. |
+| USYNC005 | An `<Empty Change="Delete">` file and a live item with the same `Key`. |
+
+**Warnings** (exit 0, unless `--warnings-as-errors`):
+
+| Id | Check |
+|---|---|
+| USYNC101 | A composition, parent, data type, list view, template, parent template or allowed child that no file in the folder defines. Often fine (it's already on the site), but can mean a file is missing from the commit. |
+| USYNC102 | `usync.config` was written by an older major version of uSync than the one in the site's `.csproj` (or `Directory.Packages.props`). Run a full export. |
+| USYNC103 | Unknown folders, or files that aren't `.config` files. Folders whose files are uSync items (custom handlers) are fine. |
+| USYNC104 | Content, blueprints or media whose content / media type has no file (only with `--content`). |
+| | |
+| USYNC201 | (error) `--publish-folder` output is missing the uSync folder, or files in it are missing or different. |
+
+Options:
+
+| Option | |
+|---|---|
+| `--folder <path>` | The uSync folder, if it can't be found. |
+| `--content` | Also check `Content`, `Media` and `Blueprints`. Off by default, as content folders can be big. |
+| `--format text\|github\|sarif\|junit` | Default `github` when `GITHUB_ACTIONS=true`, else `text`. `github` writes annotations that show on the pull request. `sarif` (2.1.0) is for GitHub code scanning and Azure DevOps, `junit` shows as test results in Azure DevOps and GitLab. |
+| `--output <file>` | Write `sarif` / `junit` to a file (the problems are still listed in the log). Without it they go to stdout. |
+| `--warnings-as-errors` | Warnings fail the run too. |
+| `--changed-since <ref>` | Only report problems in files changed since the ref (`git diff <ref>...HEAD`, plus uncommitted and untracked files). Every file is still loaded, so a clash between a new file and an existing one is found. Needs the ref's history - in GitHub Actions use `fetch-depth: 0`. |
+| `--summary` | Write a markdown summary to `$GITHUB_STEP_SUMMARY` (or the console when it isn't set). With `--changed-since` it lists each item the branch adds, changes or deletes. |
+| `--publish-folder <path>` | Check a publish output contains the uSync folder with the same files. Forgetting to copy it is a common deploy mistake, and the only symptom is that nothing imports. |
+
+Exit codes: `0` clean, `1` errors (or warnings with `--warnings-as-errors`), `2` the tool itself failed
+(folder not found, bad arguments, git failed).
+
+e.g. on a pull request:
+
+```
+uSyncCli files-verify --changed-since origin/main --summary
+```
+
+## Waiting for a site (`usync-ping`)
+
+After a deploy, `usync-ping` waits until the site hands out an access token:
+
+```
+uSyncCli usync-ping --timeout 300
+```
+
+It tries every few seconds until `--timeout` (seconds, default 300) runs out, then exits 1 with "the site
+never came up". If the site answers but refuses the client id or secret, it stops straight away.
+`--retrys` also limits the number of attempts.
+
+## Reporting changes (`usync-report`)
+
+`usync-report` is a dry run of an import: it lists what would change on the site, without changing anything.
+Takes the same `--set` and `--group` options as `usync-import`. It exits `0` even when there are changes, and `1`
+only if the report itself fails.
+
+```
+uSyncCli usync-report --set Default
+```
+
+## Health checks
+
+`healthcheck-group-check --group uSync` exits 1 when any result is an error, so a pipeline can run the
+uSync folder checks on a deployed site.
+
+## Errors and exit codes
+
+Errors print as one `ERROR: ...` line. Commands exit `2` when they are used wrongly or not configured
+(a missing option, no server or credentials, a client id that doesn't start with `umbraco-back-office`)
+and `1` when something fails at run time (the site rejected the credentials, an HTTP error).
+Set `USYNC_DEBUG=1` to see the full stack trace.
+
+## GitHub step summary
+
+When `$GITHUB_STEP_SUMMARY` is set (it is in GitHub Actions), `usync-import` and `usync-report` add a
+markdown table of the changes to the job summary, and `files-verify --summary` adds its results.
 
 ## Imports and exports
 
