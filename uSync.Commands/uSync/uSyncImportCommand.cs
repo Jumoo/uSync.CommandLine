@@ -31,6 +31,7 @@ public class uSyncImportCommand : uSyncPerformCommandBase, ISyncCommand
 
             // do the results.
             await DisplayResults("Imported", results);
+            WriteStepSummary("Import", results, GetConnectionPartameters(context).Url.ToString());
             context.ExitCode = GetExitCode(results);
         });
     }

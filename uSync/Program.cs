@@ -29,7 +29,8 @@ var serviceProvider = BuildHelper.BuildServiceProvider(
         typeof(uSyncSettingsCommand),
         typeof(uSyncImportCommand),
         typeof(uSyncExportCommand),
-        typeof(uSyncPingCommand)
+        typeof(uSyncPingCommand),
+        typeof(uSyncReportCommand)
     ]);
 
 var parser = BuildHelper.BuildParser(serviceProvider);
