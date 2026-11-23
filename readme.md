@@ -189,6 +189,13 @@ uSyncCli usync-report --set Default
 `healthcheck-group-check --group uSync` exits 1 when any result is an error, so a pipeline can run the
 uSync folder checks on a deployed site.
 
+## Errors and exit codes
+
+Errors print as one `ERROR: ...` line. Commands exit `2` when they are used wrongly or not configured
+(a missing option, no server or credentials, a client id that doesn't start with `umbraco-back-office`)
+and `1` when something fails at run time (the site rejected the credentials, an HTTP error).
+Set `USYNC_DEBUG=1` to see the full stack trace.
+
 ## GitHub step summary
 
 When `$GITHUB_STEP_SUMMARY` is set (it is in GitHub Actions), `usync-import` and `usync-report` add a
