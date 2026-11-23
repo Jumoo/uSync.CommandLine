@@ -83,9 +83,10 @@ public class uSyncPingCommand : ConnectedCommandBase, ISyncCommand
                 lastError = result.Error;
 
                 if (retries.HasValue && attempts >= retries.Value) break;
-                if (elapsed.Elapsed + RetryDelay >= timeout) break;
+                var remaining = timeout - elapsed.Elapsed;
+                if (remaining <= TimeSpan.FromSeconds(1)) break;
 
-                try { await Task.Delay(RetryDelay, cancel); }
+                try { await Task.Delay(remaining < RetryDelay ? remaining - TimeSpan.FromSeconds(1) : RetryDelay, cancel); }
                 catch (TaskCanceledException) { break; }
             }
 
