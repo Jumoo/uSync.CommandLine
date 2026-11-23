@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Net;
 
 using uSync.Commands.Core.Commands;
+using uSync.Commands.Core.Http;
 
 namespace uSync.Commands.uSync;
 
@@ -74,8 +75,7 @@ public class uSyncPingCommand : ConnectedCommandBase, ISyncCommand
                 {
                     // the site answered, but won't give us a token - waiting won't help.
                     await Writer.WriteLineAsync();
-                    await Writer.WriteLineAsync($"ERROR: the site answered but refused the credentials: {result.Error}");
-                    await Writer.WriteLineAsync("   Check the client id and secret, and that the API user exists on the site.");
+                    await Writer.WriteLineAsync($"ERROR: {result.Error}");
                     context.ExitCode = 1;
                     return;
                 }
@@ -126,14 +126,13 @@ public class uSyncPingCommand : ConnectedCommandBase, ISyncCommand
             if (tokenResponse.IsError is false && tokenResponse.AccessToken is not null)
                 return new PingResult(true, false, null);
 
-            // invalid_client / unauthorized_client is the OpenID server answering,
-            // so the site is up and the credentials are wrong.
-            var fatal = tokenResponse.ErrorType == ResponseErrorType.Protocol
-                && tokenResponse.HttpStatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized
-                && tokenResponse.Error is "invalid_client" or "unauthorized_client";
+            // a 400/401/403 from the token endpoint is the site answering,
+            // so it is up and the credentials are wrong - waiting won't help.
+            if (HttpClientExtensions.IsCredentialRejection(tokenResponse))
+                return new PingResult(false, true, HttpClientExtensions.CredentialRejectionMessage(auth, tokenResponse));
 
-            var error = tokenResponse.Error ?? tokenResponse.HttpStatusCode.ToString();
-            return new PingResult(false, fatal, error);
+            var error = tokenResponse.Error ?? $"{(int)tokenResponse.HttpStatusCode} {tokenResponse.HttpStatusCode}";
+            return new PingResult(false, false, error);
         }
         catch (OperationCanceledException) when (cancel.IsCancellationRequested is false)
         {
