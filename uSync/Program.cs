@@ -4,6 +4,7 @@ using System.Diagnostics;
 using uSync;
 using uSync.Commands.Cache;
 using uSync.Commands.Core.Commands;
+using uSync.Commands.Core.Files;
 using uSync.Commands.HealthChecks;
 using uSync.Commands.Index;
 using uSync.Commands.Models;
@@ -13,6 +14,7 @@ using uSync.Commands.uSync;
 var serviceProvider = BuildHelper.BuildServiceProvider(
     [
         typeof(TestCommand),
+        typeof(FilesVerifyCommand),
         typeof(UserCurrentCommand),
         typeof(UserListCommand),
         typeof(CacheRebuildCommand),
@@ -40,7 +42,8 @@ if (version.IndexOf('+') > 0)
      version = version.Substring(0, version.IndexOf('+'));
 }
 
-Console.WriteLine($"uSync CommandLine: {version ?? "15.0.0"}");
-Console.WriteLine("");
+// the banner goes to stderr, so stdout can carry sarif / junit output.
+Console.Error.WriteLine($"uSync CommandLine: {version ?? "15.0.0"}");
+Console.Error.WriteLine("");
 
 return await parser.InvokeAsync(args);

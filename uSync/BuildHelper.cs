@@ -21,7 +21,20 @@ internal static class BuildHelper
             commandLineBuilder.Command.Add(command.Command);
         }
 
-        return commandLineBuilder.UseDefaults().Build();
+        // UseDefaults, except bad arguments exit with 2 (the tool failed)
+        // rather than 1, so a pipeline can tell them from failed checks.
+        return commandLineBuilder
+            .UseVersionOption()
+            .UseHelp()
+            .UseEnvironmentVariableDirective()
+            .UseParseDirective()
+            .UseSuggestDirective()
+            .RegisterWithDotnetSuggest()
+            .UseTypoCorrections()
+            .UseParseErrorReporting(2)
+            .UseExceptionHandler()
+            .CancelOnProcessTermination()
+            .Build();
     }
 
     public static ServiceProvider BuildServiceProvider(
