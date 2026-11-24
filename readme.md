@@ -32,6 +32,8 @@ Commands:
   files-verify             Check the uSync folder for problems (merge conflicts, clashes, broken files). Offline, no server needed.
   user-current             Fetch the user executing the commands
   user-list                List all users
+  content-urls             Check every published document has a working url (no collisions, no unpublished parents). Exits 1 on problems.
+  recyclebin-list          List what is in the content and media recycle bins
   cache-rebuild            Rebuild the cache on the server
   cache-reload             Reload the cache on the server
   cache-status             Show whether the cache is being rebuilt on the server
@@ -269,6 +271,21 @@ Set `USYNC_DEBUG=1` to see the full stack trace.
 
 When `$GITHUB_STEP_SUMMARY` is set (it is in GitHub Actions), `usync-import` and `usync-report` add a
 markdown table of the changes to the job summary, and `files-verify --summary` adds its results.
+
+## Content checks (`content-urls`, `recyclebin-list`)
+
+`content-urls` walks the content tree and checks every published document has a url in each culture it is
+published in. Umbraco works out the problems (a url that collides with another page, an unpublished parent,
+no hostname for a non-default language), and the command lists them and exits 1. Run it after a content
+import to catch pages nobody can reach.
+
+```
+uSyncCli content-urls
+```
+
+`recyclebin-list` lists what is in the content and media recycle bins (`--take`, default 50), e.g. before an
+import that deletes items. `--empty --yes` empties both bins. That permanently deletes the items, so
+`--empty` on its own refuses to run.
 
 ## Imports and exports
 
