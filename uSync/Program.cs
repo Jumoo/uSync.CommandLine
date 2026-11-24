@@ -7,7 +7,9 @@ using uSync.Commands.Core.Commands;
 using uSync.Commands.Core.Files;
 using uSync.Commands.HealthChecks;
 using uSync.Commands.Index;
+using uSync.Commands.LogViewer;
 using uSync.Commands.Models;
+using uSync.Commands.Server;
 using uSync.Commands.User;
 using uSync.Commands.uSync;
 
@@ -20,6 +22,7 @@ var serviceProvider = BuildHelper.BuildServiceProvider(
         typeof(UserListCommand),
         typeof(CacheRebuildCommand),
         typeof(CacheReloadCommand),
+        typeof(CacheStatusCommand),
         typeof(ModelsRebuildCommand),
         typeof(ModelsStatusCommand),
         typeof(IndexerRebuildCommand),
@@ -27,6 +30,10 @@ var serviceProvider = BuildHelper.BuildServiceProvider(
         typeof(HealthCheckListCommand),
         typeof(HealthCheckGroupListCommand),
         typeof(HealthCheckGroupCheckCommand),
+        typeof(HealthCheckRunAllCommand),
+        typeof(ServerStatusCommand),
+        typeof(PackageMigrationsCommand),
+        typeof(LogErrorsCommand),
         typeof(uSyncSettingsCommand),
         typeof(uSyncImportCommand),
         typeof(uSyncExportCommand),

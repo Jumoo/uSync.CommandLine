@@ -34,6 +34,7 @@ Commands:
   user-list                List all users
   cache-rebuild            Rebuild the cache on the server
   cache-reload             Reload the cache on the server
+  cache-status             Show whether the cache is being rebuilt on the server
   models-rebuild           Rebuild the models on the server
   models-status            Get the status of the models on the server
   indexer-rebuild          Rebuild the index on the server
@@ -41,6 +42,10 @@ Commands:
   healthcheck-list         List the health checks on the server
   healthcheck-group-list   List the health check groups on the server
   healthcheck-group-check  Run a health check on the server
+  healthcheck-run-all      Run every health check group on the server
+  server-status            Show the site's runtime level and Umbraco version. Exits 1 unless the site is running.
+  package-migrations       List the packages with pending migrations, and run them with --run
+  log-errors               List errors logged on the site recently. Exits 1 if there are any.
   usync-settings           List all settings
   usync-import             Import all items
   usync-export             Export all items
@@ -174,6 +179,30 @@ It tries every few seconds until `--timeout` (seconds, default 300) runs out, th
 never came up". If the site answers but refuses the client id or secret, it stops straight away.
 `--retrys` also limits the number of attempts.
 
+## Checking a deploy (`server-status`, `package-migrations`, `log-errors`)
+
+`usync-ping` says the site answers. These say whether it is in a fit state:
+
+```
+uSyncCli server-status
+uSyncCli package-migrations --run
+uSyncCli usync-import
+uSyncCli log-errors --since 15m
+```
+
+- `server-status` shows the runtime level (`Run`, `Upgrade`, `BootFailed`...), the Umbraco version and the
+  runtime mode. It exits 1 unless the site is at `Run`. The status itself doesn't need a token, so it still
+  says why when the site is waiting for an upgrade and the API user can't sign in.
+- `package-migrations` lists packages with pending migrations. `--run` runs them (exit 1 if any fail),
+  `--fail-on-pending` exits 1 if there are any instead.
+- `log-errors` lists what the site logged at `--level` (`Warning`, `Error` (default) or `Fatal`) or worse,
+  since `--since` (`90s`, `15m` (default), `2h`, `1d`, or a date). It exits 1 if it finds any, so it works as a
+  smoke test after an import; `--no-fail` turns that off. `--take` sets how many are listed (default 20).
+  It reads Umbraco's log viewer, so it sees the logs of the server that answers the request.
+
+`cache-rebuild --wait` waits until the rebuild has finished (`--timeout`, default 600 seconds), and
+`cache-status` shows whether one is running.
+
 ## Letting the site say it's up (`files-webhook`, `uSync.Command.Notify`)
 
 Instead of a pipeline waiting with `usync-ping`, the site can tell it when a new build has started.
@@ -210,6 +239,9 @@ uSyncCli usync-report --set Default
 
 `healthcheck-group-check --group uSync` exits 1 when any result is an error, so a pipeline can run the
 uSync folder checks on a deployed site.
+
+`healthcheck-run-all` runs every group. It exits 1 on any error, or with `--fail-on warning` on warnings too
+(`--fail-on none` never fails). `--quiet` lists only the warnings and errors.
 
 ## Errors and exit codes
 
