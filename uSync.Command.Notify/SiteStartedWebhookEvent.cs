@@ -117,6 +117,11 @@ public class SiteStartedWebhookEvent : WebhookEventBase<UmbracoApplicationStarte
     /// <summary>
     ///  "1.0.0+4f1c2e..." => "4f1c2e..."
     /// </summary>
+    /// <remarks>
+    ///  when the version already has build metadata the SDK adds the commit
+    ///  with a dot: "1.0.0+build.5.{sha}". A full commit hash at the end wins,
+    ///  else everything after the '+'.
+    /// </remarks>
     internal static string? RevisionFromVersion(string? informationalVersion)
     {
         if (string.IsNullOrWhiteSpace(informationalVersion)) return null;
@@ -124,6 +129,11 @@ public class SiteStartedWebhookEvent : WebhookEventBase<UmbracoApplicationStarte
         var plus = informationalVersion.IndexOf('+');
         if (plus < 0 || plus == informationalVersion.Length - 1) return null;
 
-        return informationalVersion[(plus + 1)..].Trim();
+        var metadata = informationalVersion[(plus + 1)..].Trim();
+        var last = metadata[(metadata.LastIndexOf('.') + 1)..];
+        return IsCommitHash(last) ? last : metadata;
     }
+
+    private static bool IsCommitHash(string value)
+        => value.Length is 40 or 64 && value.All(char.IsAsciiHexDigit);
 }

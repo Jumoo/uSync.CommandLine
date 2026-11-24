@@ -76,6 +76,9 @@ public class SiteStartedWebhookTests
     }
 
     [TestCase("1.0.0+4f1c2e9", "4f1c2e9")]
+    [TestCase("17.0.0+1e2cad0bd4f9887c1cdd3ac4d6cc00aac011ef7d", "1e2cad0bd4f9887c1cdd3ac4d6cc00aac011ef7d")]
+    [TestCase("1.2.0+build.5.1e2cad0bd4f9887c1cdd3ac4d6cc00aac011ef7d", "1e2cad0bd4f9887c1cdd3ac4d6cc00aac011ef7d")]
+    [TestCase("1.2.0+build.5", "build.5")]
     [TestCase("1.0.0", null)]
     [TestCase("1.0.0+", null)]
     [TestCase(null, null)]
