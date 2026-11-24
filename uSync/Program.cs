@@ -3,7 +3,6 @@ using System.Diagnostics;
 
 using uSync;
 using uSync.Commands.Cache;
-using uSync.Commands.Config;
 using uSync.Commands.Core.Commands;
 using uSync.Commands.Core.Files;
 using uSync.Commands.HealthChecks;
@@ -15,7 +14,7 @@ using uSync.Commands.uSync;
 var serviceProvider = BuildHelper.BuildServiceProvider(
     [
         typeof(TestCommand),
-        typeof(ConfigCheckCommand),
+        typeof(uSync.Commands.Config.ConfigCheckCommand),
         typeof(FilesVerifyCommand),
         typeof(FilesWebhookCommand),
         typeof(UserCurrentCommand),
