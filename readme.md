@@ -174,6 +174,28 @@ It tries every few seconds until `--timeout` (seconds, default 300) runs out, th
 never came up". If the site answers but refuses the client id or secret, it stops straight away.
 `--retrys` also limits the number of attempts.
 
+## Letting the site say it's up (`files-webhook`, `uSync.Command.Notify`)
+
+Instead of a pipeline waiting with `usync-ping`, the site can tell it when a new build has started.
+Add the `uSync.Command.Notify` package to the site. It adds a "uSync Site Started" webhook event that fires
+once per new build, with a GitHub `repository_dispatch` shaped payload.
+
+`files-webhook` writes the webhook into your uSync folder, so it goes out with your other settings:
+
+```
+uSyncCli files-webhook --repo my-org/my-site
+```
+
+The file only names the token (a `uSync-Notify-Token: GitHubToken` header). Set the token itself on the site as
+`uSync__Notify__Secrets__GitHubToken`. The package adds it as the `Authorization` header when the webhook sends,
+and only to hosts in `uSync:Notify:AllowedHosts` (default `api.github.com`).
+
+`--url` sends somewhere other than GitHub, `--token-name` changes or (empty) drops the token header,
+`--folder` picks the uSync folder.
+
+The full setup, with the GitHub workflows that use it, is in
+[usync-actions: docs/deploy-callback.md](https://github.com/Jumoo/usync-actions/blob/main/docs/deploy-callback.md).
+
 ## Reporting changes (`usync-report`)
 
 `usync-report` is a dry run of an import: it lists what would change on the site, without changing anything.
