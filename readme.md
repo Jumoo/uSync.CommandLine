@@ -29,6 +29,7 @@ Options:
 
 Commands:
   test                     Test command
+  config-check             Show the server, client id and secret in use and where each came from, then check they sign in
   files-verify             Check the uSync folder for problems (merge conflicts, clashes, broken files). Offline, no server needed.
   user-current             Fetch the user executing the commands
   user-list                List all users
@@ -105,6 +106,25 @@ or set them as environment variables, which keeps the secret off the command lin
 | `USYNC_CLIENT_SECRET` | `-k` / `--secret` |
 
 The command line wins, then the environment variables, then appsettings.json.
+
+`config-check` shows which server, client id and secret the commands will use and where each one came from
+(an option, an environment variable, appsettings.json or launchSettings.json), then signs in and says which
+API user it is. It never prints the secret, only its length. It exits 2 if something isn't set, and 1 if the
+site rejects the credentials.
+
+```
+uSyncCli config-check
+```
+
+## JSON output (`--json`)
+
+`user-list`, `user-current`, `healthcheck-list`, `healthcheck-group-list`, `models-status` and `usync-settings`
+take `--json` to write the result as JSON instead of text, for scripts (`jq`, `ConvertFrom-Json`). The
+version banner goes to stderr, so stdout is only the JSON.
+
+```powershell
+uSyncCli user-list --json | ConvertFrom-Json | Select-Object -ExpandProperty items
+```
 
 ## Checking the uSync files (`files-verify`)
 
