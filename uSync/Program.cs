@@ -8,11 +8,8 @@ using uSync.Commands.Core.Files;
 using uSync.Commands.HealthChecks;
 using uSync.Commands.Index;
 using uSync.Commands.Models;
-using uSync.Commands.Redirects;
-using uSync.Commands.Server;
 using uSync.Commands.User;
 using uSync.Commands.uSync;
-using uSync.Commands.Webhooks;
 
 var serviceProvider = BuildHelper.BuildServiceProvider(
     [
@@ -25,9 +22,9 @@ var serviceProvider = BuildHelper.BuildServiceProvider(
         typeof(CacheReloadCommand),
         typeof(ModelsRebuildCommand),
         typeof(ModelsStatusCommand),
-        typeof(ServerTroubleshootCommand),
-        typeof(RedirectsListCommand),
-        typeof(WebhookListCommand),
+        typeof(uSync.Commands.Server.ServerTroubleshootCommand),
+        typeof(uSync.Commands.Redirects.RedirectsListCommand),
+        typeof(uSync.Commands.Webhooks.WebhookListCommand),
         typeof(IndexerRebuildCommand),
         typeof(IndexerListCommand),
         typeof(HealthCheckListCommand),
