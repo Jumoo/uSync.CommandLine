@@ -44,9 +44,9 @@ public abstract class SyncCommandBase
     public SyncConnectionParameters GetConnectionPartameters(InvocationContext context)
     {
         // command line, then environment variables, then appsettings.
-        var clientId = context.ParseResult?.GetValueForOption(optionClientId)
-            ?? FromEnvironment(ClientIdEnvironmentVariable)
-            ?? Configuration["uSync:Command:ClientId"]
+        var connection = DescribeConnection(context);
+
+        var clientId = connection.ClientId.Value
             ?? throw new SyncUsageException($"No client id: use --client-id, set {ClientIdEnvironmentVariable}, or uSync:Command:ClientId in appsettings.json");
         if (!clientId.StartsWith("umbraco-back-office"))
         {
@@ -54,13 +54,40 @@ public abstract class SyncCommandBase
         }
         return new SyncConnectionParameters
         {
-            Url = GetServerUri(context) ?? throw new SyncUsageException($"No server: use --server-url, set {ServerEnvironmentVariable}, or uSync:Command:ServerUrl in appsettings.json"),
-            ClientSecret = context.ParseResult?.GetValueForOption(optionSecret)
-                ?? FromEnvironment(ClientSecretEnvironmentVariable)
-                ?? Configuration["uSync:Command:Secret"]
+            Url = connection.ServerUrl ?? throw new SyncUsageException($"No server: use --server-url, set {ServerEnvironmentVariable}, or uSync:Command:ServerUrl in appsettings.json"),
+            ClientSecret = connection.Secret.Value
                 ?? throw new SyncUsageException($"No client secret: use --secret, set {ClientSecretEnvironmentVariable}, or uSync:Command:Secret in appsettings.json"),
             ClientId = clientId
         };
+    }
+
+    /// <summary>
+    ///  each connection setting, and where it came from - without failing when one is missing.
+    /// </summary>
+    public SyncConnectionDescription DescribeConnection(InvocationContext context)
+    {
+        var url = GetServerUri(context, out var serverSource);
+        return new SyncConnectionDescription
+        {
+            ServerUrl = url,
+            Server = new SyncConnectionSetting(url?.ToString(), serverSource),
+            ClientId = Resolve(context, optionClientId, "--client-id", ClientIdEnvironmentVariable, "uSync:Command:ClientId"),
+            Secret = Resolve(context, optionSecret, "--secret", ClientSecretEnvironmentVariable, "uSync:Command:Secret"),
+        };
+    }
+
+    private SyncConnectionSetting Resolve(InvocationContext context, Option<string> option, string optionName, string environmentVariable, string configKey)
+    {
+        var value = context.ParseResult?.GetValueForOption(option);
+        if (value is not null) return new(value, optionName);
+
+        value = FromEnvironment(environmentVariable);
+        if (value is not null) return new(value, environmentVariable);
+
+        value = Configuration[configKey];
+        if (value is not null) return new(value, $"appsettings.json {configKey}");
+
+        return new(null, null);
     }
 
     private string? FromEnvironment(string name)
@@ -69,11 +96,13 @@ public abstract class SyncCommandBase
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 
-    private Uri? GetServerUri(InvocationContext context)
+    private Uri? GetServerUri(InvocationContext context, out string? source)
     {
+        source = "--server-url";
         var uri = context.ParseResult?.GetValueForOption(optionServerUrl);
         if (uri is not null) return uri;
 
+        source = ServerEnvironmentVariable;
         var fromEnvironment = FromEnvironment(ServerEnvironmentVariable);
         if (fromEnvironment is not null)
         {
@@ -83,20 +112,25 @@ public abstract class SyncCommandBase
             throw new SyncUsageException($"{ServerEnvironmentVariable} is not a valid url");
         }
 
+        source = "appsettings.json uSync:Command:ServerUrl";
         uri = GetServerUriFromConfig("uSync:Command:ServerUrl");
         if (uri is not null) return uri;
 
+        source = "appsettings.json Umbraco:CMS:WebRouting:UmbracoApplicationUrl";
         uri = GetServerUriFromConfig("Umbraco:CMS:WebRouting:UmbracoApplicationUrl");
         if (uri is not null) return uri;
 
+        source = "Properties/launchSettings.json";
         uri = GetServerUrlFromLaunchSettings("Properties/launchSettings.json");
         if (uri is not null) return uri;
 
 #if DEBUG
+        source = "../Umbraco.Site/Properties/launchSettings.json";
         uri = GetServerUrlFromLaunchSettings("../Umbraco.Site/Properties/launchSettings.json");
         if (uri is not null) return uri;
 #endif
 
+        source = null;
         return null;
     }
 
@@ -139,4 +173,17 @@ public class SyncConnectionParameters
     public required Uri Url { get; set; }
     public required string ClientSecret { get; set; }
     public required string ClientId { get; set; }
+}
+
+/// <summary>
+///  a connection setting's value and where it came from (null when it isn't set).
+/// </summary>
+public sealed record SyncConnectionSetting(string? Value, string? Source);
+
+public class SyncConnectionDescription
+{
+    public Uri? ServerUrl { get; init; }
+    public required SyncConnectionSetting Server { get; init; }
+    public required SyncConnectionSetting ClientId { get; init; }
+    public required SyncConnectionSetting Secret { get; init; }
 }
