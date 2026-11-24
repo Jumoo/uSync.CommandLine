@@ -36,8 +36,11 @@ Commands:
   cache-reload             Reload the cache on the server
   models-rebuild           Rebuild the models on the server
   models-status            Get the status of the models on the server
+  server-troubleshoot      Show the site's troubleshooting information (versions, OS, database), for support issues
+  redirects-list           Show whether redirect tracking is on, and list the redirects
+  webhook-list             List the webhooks on the server
   indexer-rebuild          Rebuild the index on the server
-  indexer-list             List the indexes on the server
+  indexer-list             List the indexes on the server, with their health and document counts
   healthcheck-list         List the health checks on the server
   healthcheck-group-list   List the health check groups on the server
   healthcheck-group-check  Run a health check on the server
@@ -217,6 +220,18 @@ Errors print as one `ERROR: ...` line. Commands exit `2` when they are used wron
 (a missing option, no server or credentials, a client id that doesn't start with `umbraco-back-office`)
 and `1` when something fails at run time (the site rejected the credentials, an HTTP error).
 Set `USYNC_DEBUG=1` to see the full stack trace.
+
+## Diagnostics
+
+- `server-troubleshoot` prints the site's troubleshooting information (Umbraco and .NET versions, OS, database,
+  runtime mode...), the same as the backoffice's Information dashboard. `--markdown` writes it as a table to
+  paste into an issue.
+- `redirects-list` says whether redirect tracking is on and lists the redirects (`--filter` on the original url,
+  `--take`, default 100).
+- `webhook-list` lists the webhooks with their url and events, e.g. to check the one `files-webhook` wrote was
+  imported. Header values can be secrets, so it only shows header names.
+- `indexer-list` shows each index's health and document count. `--fail-unhealthy` exits 1 if any index isn't
+  healthy.
 
 ## GitHub step summary
 
