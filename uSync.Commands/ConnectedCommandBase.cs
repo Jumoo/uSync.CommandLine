@@ -30,7 +30,9 @@ public class ConnectedCommandBase : SyncCommandBase
     protected async Task<UmbracoClient> GetUmbracoClient(InvocationContext context)
     {
         var auth = GetConnectionPartameters(context);
-        Client.BaseAddress = auth.Url;
+        // BaseAddress can't change once the client has sent a request
+        // (server-status asks for the status before it signs in).
+        Client.BaseAddress ??= auth.Url;
         await Client.AuthorizeUmbracoClient(auth);
         return new UmbracoClient(auth.Url.AbsoluteUri, Client);
     }
