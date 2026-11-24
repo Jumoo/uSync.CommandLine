@@ -30,6 +30,9 @@ Options:
 Commands:
   test                     Test command
   files-verify             Check the uSync folder for problems (merge conflicts, clashes, broken files). Offline, no server needed.
+  files-diff               List the uSync items added, changed or deleted since a git ref. Offline, needs git.
+  files-find               Find the uSync files for an item by key, alias or file name. Offline, no server needed.
+  files-clean              List uSync's delete markers with their age, and remove old ones with --remove. Offline.
   user-current             Fetch the user executing the commands
   user-list                List all users
   cache-rebuild            Rebuild the cache on the server
@@ -161,6 +164,26 @@ e.g. on a pull request:
 ```
 uSyncCli files-verify --changed-since origin/main --summary
 ```
+
+## More offline file commands (`files-diff`, `files-find`, `files-clean`)
+
+These work on the uSync folder in your repo, like `files-verify`, and take `--folder` the same way.
+
+`files-diff <ref>` lists the uSync items a branch adds, changes or deletes since the ref (plus uncommitted
+changes): the same list `files-verify --changed-since <ref> --summary` writes, without running the checks.
+`--format text|json|markdown` (default `text`).
+
+```
+uSyncCli files-diff origin/main --format json
+```
+
+`files-find <key-or-alias>` lists the files that hold an item, by key, alias (any case) or file name, including
+content and media. Handy when `files-verify` reports a clash (USYNC003, USYNC004). Exits 1 if nothing matches.
+
+`files-clean` lists uSync's delete markers (`<Empty Change="Delete">` files) with how long ago each was last
+committed. A marker is how uSync tells other sites to delete an item, so it has to stay until every site has
+imported it. Once that's certain, `--older-than <days> --remove` deletes the markers committed more than that
+many days ago (uncommitted ones are never removed). Commit the result like any other change.
 
 ## Waiting for a site (`usync-ping`)
 
