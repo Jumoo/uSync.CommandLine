@@ -87,6 +87,28 @@ public static class GitChanges
         }
     }
 
+    /// <summary>
+    ///  when the file was last committed, or null (not committed, or not in a git repository).
+    /// </summary>
+    public static DateTimeOffset? GetLastCommitDate(string filePath)
+    {
+        var folder = Path.GetDirectoryName(filePath);
+        if (folder is null) return null;
+        var top = GetTopLevel(folder);
+        if (top is null) return null;
+
+        try
+        {
+            var relative = Path.GetRelativePath(top, filePath).Replace('\\', '/');
+            var date = Run(top, "log", "-1", "--format=%cI", "--", relative).Trim();
+            return DateTimeOffset.TryParse(date, out var value) ? value : null;
+        }
+        catch (GitException)
+        {
+            return null;
+        }
+    }
+
     public static StringComparer PathComparer { get; } =
         OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 
