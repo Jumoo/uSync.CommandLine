@@ -17,6 +17,7 @@ using uSync.Commands.uSync;
 var serviceProvider = BuildHelper.BuildServiceProvider(
     [
         typeof(TestCommand),
+        typeof(uSync.Commands.Config.ConfigCheckCommand),
         typeof(FilesVerifyCommand),
         typeof(FilesWebhookCommand),
         typeof(FilesDiffCommand),
