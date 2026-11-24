@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System.CommandLine;
 
 using uSync.Commands.Core.Commands;
+using uSync.Commands.Core.Output;
 
 namespace uSync.Commands.Webhooks;
 
@@ -11,6 +12,8 @@ namespace uSync.Commands.Webhooks;
 /// </summary>
 public class WebhookListCommand : ConnectedCommandBase, ISyncCommand
 {
+    private readonly Option<bool> _json = JsonOutput.CreateOption();
+
     public Command Command { get; }
 
     public WebhookListCommand(
@@ -20,11 +23,34 @@ public class WebhookListCommand : ConnectedCommandBase, ISyncCommand
     {
         Command = new Command("webhook-list", "List the webhooks on the server");
         AddCoreOptions(Command);
+        Command.AddOption(_json);
 
         Command.SetHandler(async (context) =>
         {
             var umbracoClient = await GetUmbracoClient(context);
             var webhooks = await umbracoClient.GetWebhookAsync(0, 1000, context.GetCancellationToken());
+
+            if (context.ParseResult.GetValueForOption(_json))
+            {
+                // header values can be secrets, so only the names - as in the text output.
+                await JsonOutput.WriteAsync(Writer, new
+                {
+                    webhooks.Total,
+                    Items = webhooks.Items.Select(x => new
+                    {
+                        x.Id,
+                        x.Name,
+                        x.Description,
+                        x.Enabled,
+                        x.Url,
+                        Events = x.Events.Select(e => e.EventName),
+                        x.ContentTypeKeys,
+                        Headers = x.Headers.Keys,
+                    })
+                });
+                context.ExitCode = 0;
+                return;
+            }
 
             await Writer.WriteLineAsync($"Webhooks: {webhooks.Total}");
             foreach (var webhook in webhooks.Items)

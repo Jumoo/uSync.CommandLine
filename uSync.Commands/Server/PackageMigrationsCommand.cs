@@ -5,6 +5,7 @@ using System.CommandLine;
 using Umbraco.Management.Api;
 
 using uSync.Commands.Core.Commands;
+using uSync.Commands.Core.Output;
 
 namespace uSync.Commands.Server;
 
@@ -19,6 +20,8 @@ public class PackageMigrationsCommand : ConnectedCommandBase, ISyncCommand
     private readonly Option<bool> _failOnPending = new("--fail-on-pending",
         "exit 1 if any package has pending migrations (without --run)");
 
+    private readonly Option<bool> _json = JsonOutput.CreateOption();
+
     public Command Command { get; }
 
     public PackageMigrationsCommand(
@@ -31,6 +34,7 @@ public class PackageMigrationsCommand : ConnectedCommandBase, ISyncCommand
             _run, _failOnPending
         };
         AddCoreOptions(Command);
+        Command.AddOption(_json);
 
         Command.SetHandler(async (context) =>
         {
@@ -43,6 +47,16 @@ public class PackageMigrationsCommand : ConnectedCommandBase, ISyncCommand
                 .Select(x => x.PackageName)
                 .ToList();
 
+            var json = context.ParseResult.GetValueForOption(_json);
+            var run = context.ParseResult.GetValueForOption(_run);
+
+            if (json && (run is false || pending.Count == 0))
+            {
+                await JsonOutput.WriteAsync(Writer, status.Items);
+                context.ExitCode = pending.Count > 0 && run is false && context.ParseResult.GetValueForOption(_failOnPending) ? 1 : 0;
+                return;
+            }
+
             if (pending.Count == 0)
             {
                 await Writer.WriteLineAsync("No pending package migrations.");
@@ -50,7 +64,7 @@ public class PackageMigrationsCommand : ConnectedCommandBase, ISyncCommand
                 return;
             }
 
-            if (context.ParseResult.GetValueForOption(_run) is false)
+            if (run is false)
             {
                 await Writer.WriteLineAsync($"{pending.Count} package(s) with pending migrations:");
                 foreach (var name in pending)
@@ -60,22 +74,30 @@ public class PackageMigrationsCommand : ConnectedCommandBase, ISyncCommand
                 return;
             }
 
-            var failed = 0;
+            var results = new List<MigrationResult>();
             foreach (var name in pending)
             {
                 try
                 {
                     await umbracoClient.PostPackageByNameRunMigrationAsync(name, cancel);
-                    await Writer.WriteLineAsync($"  {name}: migrated");
+                    results.Add(new MigrationResult(name, true, null));
+                    if (json is false) await Writer.WriteLineAsync($"  {name}: migrated");
                 }
                 catch (ApiException ex)
                 {
-                    failed++;
-                    await Writer.WriteLineAsync($"  {name}: FAILED ({ex.StatusCode}) {ex.Message.Split('\n')[0]}");
+                    var error = $"({ex.StatusCode}) {ex.Message.Split('\n')[0]}";
+                    results.Add(new MigrationResult(name, false, error));
+                    if (json is false) await Writer.WriteLineAsync($"  {name}: FAILED {error}");
                 }
             }
+
+            if (json) await JsonOutput.WriteAsync(Writer, results);
+
+            var failed = results.Count(x => x.Migrated is false);
 
             context.ExitCode = failed > 0 ? 1 : 0;
         });
     }
+
+    private sealed record MigrationResult(string PackageName, bool Migrated, string? Error);
 }
