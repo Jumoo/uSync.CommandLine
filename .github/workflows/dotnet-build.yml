@@ -42,6 +42,7 @@ env:
     ./uSync.Commands/uSync.Commands.csproj
     ./uSync/uSync.csproj
     ./uSync.Command.Setup/uSync.Command.Setup.csproj
+    ./uSync.Command.Notify/uSync.Command.Notify.csproj
     ./SwaggerClientGen/SwaggerClientGen.csproj
 
 jobs:

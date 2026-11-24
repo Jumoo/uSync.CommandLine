@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Files", "uSync.Files\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Files.Tests", "uSync.Files.Tests\uSync.Files.Tests.csproj", "{28173306-7862-44DA-8E8A-83575F46AB0B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Command.Notify", "uSync.Command.Notify\uSync.Command.Notify.csproj", "{0B91AE98-3373-4562-88FE-05F45B226BC7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,6 +129,18 @@ Global
 		{28173306-7862-44DA-8E8A-83575F46AB0B}.Release|x64.Build.0 = Release|Any CPU
 		{28173306-7862-44DA-8E8A-83575F46AB0B}.Release|x86.ActiveCfg = Release|Any CPU
 		{28173306-7862-44DA-8E8A-83575F46AB0B}.Release|x86.Build.0 = Release|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Debug|x64.Build.0 = Debug|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Debug|x86.Build.0 = Debug|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Release|x64.ActiveCfg = Release|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Release|x64.Build.0 = Release|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Release|x86.ActiveCfg = Release|Any CPU
+		{0B91AE98-3373-4562-88FE-05F45B226BC7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

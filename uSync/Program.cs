@@ -15,6 +15,7 @@ var serviceProvider = BuildHelper.BuildServiceProvider(
     [
         typeof(TestCommand),
         typeof(FilesVerifyCommand),
+        typeof(FilesWebhookCommand),
         typeof(UserCurrentCommand),
         typeof(UserListCommand),
         typeof(CacheRebuildCommand),

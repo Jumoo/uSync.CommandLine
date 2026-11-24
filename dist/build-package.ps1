@@ -68,6 +68,7 @@ $buildParams = "ContinuousIntegrationBuild=true,version=$versionString"
 ""; "##### Packaging"; "----------------------------------" ; ""
 dotnet pack ..\uSync\uSync.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
 dotnet pack ..\uSync.Command.Setup\uSync.Command.Setup.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
+dotnet pack ..\uSync.Command.Notify\uSync.Command.Notify.csproj -c $env -o $outFolder /p:$buildParams --no-restore # --no-build
 
 ""; "##### Copying to LocalGit folder"; "----------------------------------" ; ""
 Copy-Item -Path $outFolder\*.nupkg -Destination C:\Source\localgit

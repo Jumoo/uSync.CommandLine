@@ -1897,6 +1897,12 @@
           "uSync.Backoffice.Management.Api": "17.6.2"
         }
       },
+      "usync.command.notify": {
+        "type": "Project",
+        "dependencies": {
+          "Umbraco.Cms.Web.Common": "[17.6.2, )"
+        }
+      },
       "usync.command.setup": {
         "type": "Project",
         "dependencies": {
