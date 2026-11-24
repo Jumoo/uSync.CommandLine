@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>uSync.Command.Notify</Product>
+    <Package>uSync.Command.Notify</Package>
+    <PackageId>uSync.Command.Notify</PackageId>
+    <Title>uSync Command site started notification</Title>
+    <RootNamespace>uSync.Notify</RootNamespace>
+    <Description>Adds a "uSync Site Started" webhook event, so a deploy pipeline can be told when the site is back up instead of waiting for it.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="17.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="uSync.Files.Tests" />
+  </ItemGroup>
+
+</Project>

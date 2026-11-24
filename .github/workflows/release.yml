@@ -35,11 +35,13 @@ env:
     ./uSync.Commands/uSync.Commands.csproj
     ./uSync/uSync.csproj
     ./uSync.Command.Setup/uSync.Command.Setup.csproj
+    ./uSync.Command.Notify/uSync.Command.Notify.csproj
   # uSync.Commands / uSync.Commands.Core are internal implementation detail, consumed
   # only via ProjectReference - they aren't published as their own packages.
   package_projects: >-
     ./uSync/uSync.csproj
     ./uSync.Command.Setup/uSync.Command.Setup.csproj
+    ./uSync.Command.Notify/uSync.Command.Notify.csproj
   nuget_source: https://api.nuget.org/v3/index.json
 
 jobs:
