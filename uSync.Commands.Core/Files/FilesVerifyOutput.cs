@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
 
-using uSync.Files;
+using uSync.FolderChecks;
 
 namespace uSync.Commands.Core.Files;
 

@@ -4,7 +4,7 @@ using uSync.Commands.HealthChecks;
 using uSync.Commands.LogViewer;
 using uSync.Commands.Server;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 public class DeployCommandTests
 {

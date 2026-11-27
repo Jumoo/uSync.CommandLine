@@ -17,9 +17,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwaggerClientGen", "Swagger
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Command.Setup", "uSync.Command.Setup\uSync.Command.Setup.csproj", "{B7B69858-1562-4082-B425-C5506474ECBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Files", "uSync.Files\uSync.Files.csproj", "{41688A83-BC86-4741-B0BC-007F378554B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.FolderChecks", "uSync.FolderChecks\uSync.FolderChecks.csproj", "{41688A83-BC86-4741-B0BC-007F378554B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Files.Tests", "uSync.Files.Tests\uSync.Files.Tests.csproj", "{28173306-7862-44DA-8E8A-83575F46AB0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.FolderChecks.Tests", "uSync.FolderChecks.Tests\uSync.FolderChecks.Tests.csproj", "{28173306-7862-44DA-8E8A-83575F46AB0B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uSync.Command.Notify", "uSync.Command.Notify\uSync.Command.Notify.csproj", "{0B91AE98-3373-4562-88FE-05F45B226BC7}"
 EndProject

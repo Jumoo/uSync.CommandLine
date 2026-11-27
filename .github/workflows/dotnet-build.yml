@@ -37,7 +37,7 @@ env:
   # Umbraco.Site is a local test site, not something CI needs to build - it is
   # deliberately left out of this list.
   build_projects: >-
-    ./uSync.Files/uSync.Files.csproj
+    ./uSync.FolderChecks/uSync.FolderChecks.csproj
     ./uSync.Commands.Core/uSync.Commands.Core.csproj
     ./uSync.Commands/uSync.Commands.csproj
     ./uSync/uSync.csproj
@@ -104,4 +104,4 @@ jobs:
           done
 
       - name: test
-        run: dotnet test ./uSync.Files.Tests/uSync.Files.Tests.csproj -c ${{ env.config }} --no-restore
+        run: dotnet test ./uSync.FolderChecks.Tests/uSync.FolderChecks.Tests.csproj -c ${{ env.config }} --no-restore

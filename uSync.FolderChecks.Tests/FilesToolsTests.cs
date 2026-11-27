@@ -2,7 +2,7 @@ using System.Text.Json;
 
 using uSync.Commands.Core.Files;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 public class FilesToolsTests
 {
