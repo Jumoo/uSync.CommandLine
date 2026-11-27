@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 using uSync.Notify;
-using uSync.Files;
+using uSync.FolderChecks;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 public class SiteStartedWebhookTests
 {

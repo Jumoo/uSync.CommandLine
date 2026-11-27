@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="uSync.Files.Tests" />
+    <InternalsVisibleTo Include="uSync.FolderChecks.Tests" />
   </ItemGroup>
 
 </Project>

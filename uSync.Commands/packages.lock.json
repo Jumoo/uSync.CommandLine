@@ -140,10 +140,10 @@
           "IdentityModel": "[7.0.0, )",
           "Microsoft.Extensions.Configuration.Abstractions": "[10.0.15, )",
           "System.CommandLine": "[2.0.0-beta4.22272.1, )",
-          "uSync.Files": "[17.0.0, )"
+          "uSync.FolderChecks": "[17.0.0, )"
         }
       },
-      "usync.files": {
+      "usync.folderchecks": {
         "type": "Project"
       }
     }

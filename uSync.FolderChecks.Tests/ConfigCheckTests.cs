@@ -8,7 +8,7 @@ using uSync.Commands.Config;
 using uSync.Commands.Core.Commands;
 using uSync.Commands.Core.Output;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 public class ConfigCheckTests
 {

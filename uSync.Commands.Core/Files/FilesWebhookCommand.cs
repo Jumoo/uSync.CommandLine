@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System.CommandLine;
 
 using uSync.Commands.Core.Commands;
-using uSync.Files;
+using uSync.FolderChecks;
 
 namespace uSync.Commands.Core.Files;
 

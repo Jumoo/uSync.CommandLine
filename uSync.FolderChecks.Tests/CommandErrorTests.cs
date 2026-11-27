@@ -9,7 +9,7 @@ using uSync.Commands.Core.Commands;
 using uSync.Commands.Core.Http;
 using uSync.Commands.uSync;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 /// <summary>
 ///  errors from connected commands: one line, the right exit code, and

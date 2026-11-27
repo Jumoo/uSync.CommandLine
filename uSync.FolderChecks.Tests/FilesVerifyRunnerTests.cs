@@ -2,9 +2,9 @@ using System.Text.Json;
 using System.Xml.Linq;
 
 using uSync.Commands.Core.Files;
-using uSync.Files;
+using uSync.FolderChecks;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 public class FilesVerifyRunnerTests
 {

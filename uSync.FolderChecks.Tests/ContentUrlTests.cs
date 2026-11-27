@@ -2,7 +2,7 @@ using Umbraco.Management.Api;
 
 using uSync.Commands.Content;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 public class ContentUrlTests
 {

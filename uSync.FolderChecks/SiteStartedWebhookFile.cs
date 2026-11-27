@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace uSync.Files;
+namespace uSync.FolderChecks;
 
 /// <summary>
 ///  builds the uSync webhook file for the "uSync Site Started" event

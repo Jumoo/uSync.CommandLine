@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 using uSync.Commands.Core.Commands;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 /// <summary>
 ///  connection settings: command line, then environment variables, then appsettings.

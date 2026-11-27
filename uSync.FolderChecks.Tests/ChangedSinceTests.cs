@@ -1,9 +1,9 @@
 using System.Diagnostics;
 
 using uSync.Commands.Core.Files;
-using uSync.Files;
+using uSync.FolderChecks;
 
-namespace uSync.Files.Tests;
+namespace uSync.FolderChecks.Tests;
 
 /// <summary>
 ///  --changed-since against a real (temporary) git repository.
