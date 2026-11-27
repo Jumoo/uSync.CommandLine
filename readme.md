@@ -131,9 +131,11 @@ uSyncCli config-check
 
 ## JSON output (`--json`)
 
-`user-list`, `user-current`, `healthcheck-list`, `healthcheck-group-list`, `models-status` and `usync-settings`
-take `--json` to write the result as JSON instead of text, for scripts (`jq`, `ConvertFrom-Json`). The
-version banner goes to stderr, so stdout is only the JSON.
+`user-list`, `user-current`, `healthcheck-list`, `healthcheck-group-list`, `models-status`, `usync-settings`,
+`indexer-list`, `webhook-list`, `redirects-list`, `recyclebin-list` and `package-migrations` take `--json` to
+write the result as JSON instead of text, for scripts (`jq`, `ConvertFrom-Json`). The version banner goes to
+stderr, so stdout is only the JSON. Exit codes are the same as without `--json` (e.g. `indexer-list
+--fail-unhealthy`). `webhook-list` lists header names only, as header values can be secrets.
 
 ```powershell
 uSyncCli user-list --json | ConvertFrom-Json | Select-Object -ExpandProperty items

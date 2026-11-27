@@ -5,6 +5,7 @@ using System.CommandLine;
 using Umbraco.Management.Api;
 
 using uSync.Commands.Core.Commands;
+using uSync.Commands.Core.Output;
 
 namespace uSync.Commands.Index;
 
@@ -12,6 +13,8 @@ public class IndexerListCommand : ConnectedCommandBase, ISyncCommand
 {
     private readonly Option<bool> _failUnhealthy = new("--fail-unhealthy",
         "exit 1 if any index isn't healthy (e.g. after a rebuild)");
+
+    private readonly Option<bool> _json = JsonOutput.CreateOption();
 
     public Command Command { get; }
     public IndexerListCommand(
@@ -24,10 +27,21 @@ public class IndexerListCommand : ConnectedCommandBase, ISyncCommand
             _failUnhealthy
         };
         AddCoreOptions(Command);
+        Command.AddOption(_json);
         Command.SetHandler(async (context) =>
         {
             var umbracoClient = await GetUmbracoClient(context);
             var indexes = await umbracoClient.GetIndexerAsync(0, 1000);
+            var failUnhealthy = context.ParseResult.GetValueForOption(_failUnhealthy);
+
+            if (context.ParseResult.GetValueForOption(_json))
+            {
+                await JsonOutput.WriteAsync(Writer, indexes);
+                var anyUnhealthy = indexes.Items.Any(x => (x.HealthStatus?.Status ?? HealthStatusModel.Unhealthy) != HealthStatusModel.Healthy);
+                context.ExitCode = anyUnhealthy && failUnhealthy ? 1 : 0;
+                return;
+            }
+
             await writer.WriteLineAsync($"Indexer Count: {indexes.Total}");
 
             var width = indexes.Items.Count == 0 ? 0 : indexes.Items.Max(x => x.Name?.Length ?? 0);
@@ -41,7 +55,7 @@ public class IndexerListCommand : ConnectedCommandBase, ISyncCommand
                 await writer.WriteLineAsync($"  {(index.Name ?? string.Empty).PadRight(width)}  {status,-10} {index.DocumentCount,8} docs{(index.CanRebuild ? "" : "  (can't rebuild)")}{message}");
             }
 
-            context.ExitCode = unhealthy > 0 && context.ParseResult.GetValueForOption(_failUnhealthy) ? 1 : 0;
+            context.ExitCode = unhealthy > 0 && failUnhealthy ? 1 : 0;
         });
     }
 }

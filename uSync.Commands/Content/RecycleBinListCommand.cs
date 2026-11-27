@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System.CommandLine;
 
 using uSync.Commands.Core.Commands;
+using uSync.Commands.Core.Output;
 
 namespace uSync.Commands.Content;
 
@@ -22,6 +23,8 @@ public class RecycleBinListCommand : ConnectedCommandBase, ISyncCommand
     private readonly Option<bool> _yes = new("--yes",
         "confirm --empty");
 
+    private readonly Option<bool> _json = JsonOutput.CreateOption();
+
     public Command Command { get; }
 
     public RecycleBinListCommand(
@@ -34,6 +37,7 @@ public class RecycleBinListCommand : ConnectedCommandBase, ISyncCommand
             _take, _empty, _yes
         };
         AddCoreOptions(Command);
+        Command.AddOption(_json);
 
         Command.SetHandler(async (context) =>
         {
@@ -46,23 +50,38 @@ public class RecycleBinListCommand : ConnectedCommandBase, ISyncCommand
             var take = Math.Max(0, context.ParseResult.GetValueForOption(_take));
 
             var documents = await umbracoClient.GetRecycleBinDocumentRootAsync(0, take, cancel);
+            var media = await umbracoClient.GetRecycleBinMediaRootAsync(0, take, cancel);
+
+            if (context.ParseResult.GetValueForOption(_json))
+            {
+                // what was in the bins (before --empty empties them).
+                await JsonOutput.WriteAsync(Writer, new { Content = documents, Media = media, Emptied = empty });
+                if (empty) await EmptyBins(umbracoClient, cancel);
+                context.ExitCode = 0;
+                return;
+            }
+
             await WriteBin("Content", documents.Total,
                 documents.Items.Select(x => (Name(x.Variants.Select(v => v.Name)), x.HasChildren)).ToList());
 
-            var media = await umbracoClient.GetRecycleBinMediaRootAsync(0, take, cancel);
             await WriteBin("Media", media.Total,
                 media.Items.Select(x => (Name(x.Variants.Select(v => v.Name)), x.HasChildren)).ToList());
 
             if (empty)
             {
-                await umbracoClient.DeleteRecycleBinDocumentAsync(cancel);
-                await umbracoClient.DeleteRecycleBinMediaAsync(cancel);
+                await EmptyBins(umbracoClient, cancel);
                 await Writer.WriteLineAsync();
                 await Writer.WriteLineAsync("Emptied the content and media recycle bins.");
             }
 
             context.ExitCode = 0;
         });
+    }
+
+    private static async Task EmptyBins(Umbraco.Management.Api.UmbracoClient client, CancellationToken cancel)
+    {
+        await client.DeleteRecycleBinDocumentAsync(cancel);
+        await client.DeleteRecycleBinMediaAsync(cancel);
     }
 
     private async Task WriteBin(string title, long total, IReadOnlyList<(string Name, bool HasChildren)> items)
